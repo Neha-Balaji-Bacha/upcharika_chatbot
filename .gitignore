@@ -1,0 +1,11 @@
+medbot_env/
+models/
+vectorstore/
+data/
+*.pdf
+*.zip
+*.gguf
+.env
+__pycache__/
+*.pyc
+.history/
