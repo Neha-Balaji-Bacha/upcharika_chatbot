@@ -115,48 +115,51 @@ html, body, [class*="css"] {
     letter-spacing: 0.2px;
 }
 
-/* Professional Streamlit Tabs - Centered */
-.stTabs {
+/* Universal Streamlit Tabs - Centered */
+div[data-testid="stTabs"] {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-}
-
-.stTabs [data-baseweb="tab-list"] {
-    display: flex !important;
-    justify-content: center !important;
-    gap: 12px;
-    background-color: #0b1120;
-    padding: 6px;
-    border-radius: 10px;
-    border: 1px solid #1e293b;
-    margin: 0 auto 20px auto !important;
-    width: fit-content !important;
-}
-
-.stTabs [data-baseweb="tab-panel"] {
     width: 100% !important;
 }
 
-.stTabs [data-baseweb="tab-border"] {
-    display: none !important;
+div[data-testid="stTabs"] > div:first-child,
+div[data-testid="stTabs"] [data-baseweb="tab-list"],
+div[role="tablist"],
+[data-baseweb="tab-list"] {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 16px !important;
+    width: 100% !important;
+    margin: 0 auto 20px auto !important;
+    border-bottom: 1px solid #1e293b !important;
+    padding-bottom: 8px !important;
 }
 
-.stTabs [data-baseweb="tab-highlight"] {
-    display: none !important;
+div[data-testid="stTabs"] [data-baseweb="tab-panel"] {
+    width: 100% !important;
 }
 
-.stTabs [data-baseweb="tab"] {
-    border-radius: 8px;
-    padding: 10px 28px;
-    color: #94a3b8;
-    font-weight: 600;
-    font-size: 14px;
+[data-baseweb="tab"],
+button[data-baseweb="tab"],
+div[role="tablist"] button {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    padding: 10px 24px !important;
+    border-radius: 8px !important;
+    color: #94a3b8 !important;
+    border: none !important;
 }
 
-.stTabs [aria-selected="true"] {
+button[data-baseweb="tab"][aria-selected="true"],
+div[role="tablist"] button[aria-selected="true"] {
     background-color: #0284c7 !important;
     color: #ffffff !important;
+}
+
+[data-baseweb="tab-highlight"] {
+    display: none !important;
 }
 
 /* Professional Form Inputs */
@@ -609,8 +612,8 @@ def auth_ui():
         </div>
         """, unsafe_allow_html=True)
 
-    # Wide, centered container for professional appearance
-    col1, col2, col3 = st.columns([0.5, 3.0, 0.5])
+    # Centered container for professional appearance
+    col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.markdown("""
         <div class="auth-container">
