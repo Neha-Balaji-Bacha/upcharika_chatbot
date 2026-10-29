@@ -13,13 +13,18 @@ from dotenv import load_dotenv
 from gtts import gTTS
 import tempfile
 from deep_translator import GoogleTranslator
+
+# Compatibility fix for newer Streamlit versions (Streamlit >= 1.28 removed st.cache)
+if not hasattr(st, "cache"):
+    st.cache = st.cache_data
+
 from streamlit_cookies_manager import EncryptedCookieManager
 
 # ================= GOOGLE DRIVE VECTORSTORE =================
 VECTOR_URL = "https://drive.google.com/uc?id=1UunmpU4iudJycj-OibngzcJf18nA6OmR"
 def load_vectorstore():
     if not os.path.exists("vectorstore/db_faiss/index.faiss"):
-        with st.spinner("⚡ Preparing AI system... please wait"):
+        with st.spinner("Preparing AI system... please wait"):
             gdown.download(VECTOR_URL, "vs.zip", quiet=False)
 
             with zipfile.ZipFile("vs.zip", 'r') as zip_ref:
