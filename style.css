@@ -38,25 +38,29 @@ html, body, [class*="css"] {
    ========================================================================== */
 
 /* Modern Card Border Wrapper (st.container(border=True)) */
-div[data-testid="stVerticalBlockBorderWrapper"],
-div[data-testid="stVerticalBlockBorderWrapper"] > div,
-div.e1lln2w84 {
-    border-radius: 28px !important;
-}
-
-div[data-testid="stVerticalBlockBorderWrapper"],
-div.e1lln2w84 {
+div[data-testid="stVerticalBlockBorderWrapper"]:not(div[data-testid="stHorizontalBlock"] *) {
     background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 28px !important;
-    padding: 44px 44px 36px 44px !important;
-    box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.07), 0 0 1px rgba(0, 0, 0, 0.08) !important;
-    margin-top: 24px !important;
-    margin-bottom: 24px !important;
-    max-width: 480px !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 36px !important;
+    padding: 42px 38px 36px 38px !important;
+    box-shadow: 0 25px 60px -15px rgba(99, 102, 241, 0.16), 0 0 1px 1px rgba(226, 232, 240, 0.8) !important;
+    margin-top: 20px !important;
+    margin-bottom: 20px !important;
+    max-width: 460px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     overflow: hidden !important;
+}
+
+div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"],
+div[data-testid="stHorizontalBlock"] div[data-testid="column"],
+div[data-testid="stHorizontalBlock"] div[data-testid="stVerticalBlockBorderWrapper"] {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
 }
 
 .auth-header-block {
@@ -279,24 +283,69 @@ div.stButton {
 
 div.stButton > button {
     width: 100% !important;
-    min-height: 52px !important;
+    min-height: 48px !important;
     border-radius: 14px !important;
-    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important;
-    color: #ffffff !important;
-    font-weight: 700 !important;
-    border: none !important;
-    padding: 13px 28px !important;
-    font-size: 16px !important;
-    letter-spacing: 0.3px !important;
-    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.32) !important;
-    transition: all 0.25s ease !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    transition: all 0.2s ease !important;
     cursor: pointer !important;
 }
 
-div.stButton > button:hover {
-    background: linear-gradient(135deg, #4338ca 0%, #3730a3 100%) !important;
+/* Primary Action Buttons (Submit, Active Switcher) */
+div.stButton > button[kind="primary"],
+div.stButton > button[data-testid="baseButton-primary"] {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border: none !important;
+    padding: 12px 24px !important;
+    box-shadow: 0 8px 22px rgba(79, 70, 229, 0.32) !important;
+}
+
+div.stButton > button[kind="primary"]:hover,
+div.stButton > button[data-testid="baseButton-primary"]:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%) !important;
     transform: translateY(-1.5px) !important;
-    box-shadow: 0 10px 24px rgba(79, 70, 229, 0.45) !important;
+    box-shadow: 0 10px 26px rgba(79, 70, 229, 0.42) !important;
+}
+
+/* Secondary Buttons */
+div.stButton > button[kind="secondary"],
+div.stButton > button[data-testid="baseButton-secondary"] {
+    background: #ffffff !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+div.stButton > button[kind="secondary"]:hover,
+div.stButton > button[data-testid="baseButton-secondary"]:hover {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+/* Quick Suggestions in Dashboard (Mockup 2) */
+div[data-testid="column"] div.stButton > button[key^="sugg_"] {
+    background: #ffffff !important;
+    border: 1.5px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+    padding: 16px 18px !important;
+    color: #334155 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    justify-content: flex-start !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
+    min-height: 58px !important;
+}
+
+div[data-testid="column"] div.stButton > button[key^="sugg_"]:hover {
+    border-color: #6366f1 !important;
+    transform: translateY(-1.5px) !important;
+    box-shadow: 0 6px 18px rgba(99, 102, 241, 0.12) !important;
+    color: #4f46e5 !important;
 }
 
 div.stButton > button:active {
@@ -306,7 +355,6 @@ div.stButton > button:active {
 div.stButton > button:focus,
 div.stButton > button:focus-visible {
     outline: none !important;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.4) !important;
 }
 
 /* ==========================================================================
