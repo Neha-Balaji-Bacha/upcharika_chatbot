@@ -230,10 +230,8 @@ def auth_ui():
             tab_login, tab_register = st.tabs(["Sign In", "Register"])
 
             with tab_login:
-                st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
                 user = st.text_input("Username", key="login_user", placeholder="Enter your registered username")
                 pw = st.text_input("Password", type="password", key="login_pw", placeholder="Enter your password")
-                st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
                 btn_login = st.button("Sign In to Portal", key="btn_login", use_container_width=True)
 
                 if btn_login:
@@ -254,10 +252,8 @@ def auth_ui():
                             st.error(msg)
 
             with tab_register:
-                st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
                 new_user = st.text_input("Choose Username", key="reg_user", placeholder="Enter a unique username")
                 new_pw = st.text_input("Choose Password", type="password", key="reg_pw", placeholder="Create a secure password")
-                st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
                 btn_reg = st.button("Create Account", key="btn_reg", use_container_width=True)
 
                 if btn_reg:
