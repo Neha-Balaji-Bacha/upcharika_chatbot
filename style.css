@@ -3,26 +3,32 @@
    ========================================================================== */
 
 /* Typography */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap');
 
 html, body, [class*="css"] {
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
-/* Background & Core Theme */
+/* Background & Core Theme with Ambient Medical Lighting */
 [data-testid="stAppViewContainer"] {
-    background: #090e17 !important;
+    background: 
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(14, 165, 233, 0.22) 0%, rgba(7, 11, 20, 0) 70%),
+        radial-gradient(circle at 15% 90%, rgba(2, 132, 199, 0.12) 0%, rgba(7, 11, 20, 0) 50%),
+        radial-gradient(circle at 85% 85%, rgba(56, 189, 248, 0.1) 0%, rgba(7, 11, 20, 0) 50%),
+        #070b14 !important;
     color: #e2e8f0;
 }
 
 [data-testid="stHeader"] {
-    background: rgba(9, 14, 23, 0.85) !important;
-    backdrop-filter: blur(8px) !important;
-    border-bottom: 1px solid #1e293b;
+    background: transparent !important;
+}
+
+#MainMenu, footer {
+    visibility: hidden;
 }
 
 [data-testid="stSidebar"] {
-    background-color: #0b1120 !important;
+    background-color: #090e17 !important;
     border-right: 1px solid #1e293b !important;
 }
 
@@ -32,39 +38,68 @@ html, body, [class*="css"] {
 
 /* Modern Card Border Wrapper (from st.container(border=True)) */
 div[data-testid="stVerticalBlockBorderWrapper"] {
-    background: #0f172a !important;
-    border: 1px solid #1e293b !important;
-    border-radius: 16px !important;
-    padding: 38px 44px 28px 44px !important;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45) !important;
-    margin-top: 15px;
-    margin-bottom: 25px;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(10, 15, 28, 0.98) 100%) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border: 1px solid rgba(56, 189, 248, 0.22) !important;
+    border-top: 1.5px solid rgba(56, 189, 248, 0.55) !important;
+    border-radius: 24px !important;
+    padding: 38px 42px 30px 42px !important;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85), 0 0 35px rgba(14, 165, 233, 0.12) !important;
+    margin-top: 20px !important;
+    margin-bottom: 20px !important;
+    max-width: 500px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 
 .auth-header-block {
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
 }
 
-.auth-stethoscope {
-    font-size: 42px;
-    margin-bottom: 10px;
+.brand-glow-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 68px;
+    height: 68px;
+    background: radial-gradient(circle at 30% 30%, rgba(56, 189, 248, 0.25), rgba(2, 132, 199, 0.08));
+    border: 1.5px solid rgba(56, 189, 248, 0.45);
+    border-radius: 20px;
+    font-size: 32px;
+    margin-bottom: 14px;
+    box-shadow: 0 0 25px rgba(14, 165, 233, 0.25), inset 0 0 15px rgba(56, 189, 248, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.brand-badge-pill {
     display: inline-block;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #38bdf8;
+    background: rgba(14, 165, 233, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    margin-bottom: 10px;
+    text-transform: uppercase;
 }
 
-.auth-main-title {
+.brand-heading {
     font-family: 'Outfit', sans-serif !important;
-    font-size: 26px !important;
-    font-weight: 700 !important;
+    font-size: 30px !important;
+    font-weight: 800 !important;
     color: #f8fafc !important;
+    letter-spacing: -0.5px !important;
     margin: 0 0 6px 0 !important;
-    letter-spacing: -0.3px;
 }
 
-.auth-sub-title {
+.brand-caption {
+    font-size: 13.5px;
     color: #94a3b8;
-    font-size: 14px;
-    margin: 0;
+    margin: 0 0 12px 0;
     line-height: 1.5;
 }
 
@@ -72,17 +107,23 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 12px;
-    margin-top: 24px;
-    padding-top: 16px;
-    border-top: 1px solid #1e293b;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 26px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
     color: #64748b;
     font-size: 12px;
-    letter-spacing: 0.2px;
+    letter-spacing: 0.3px;
+}
+
+.auth-footer-meta .meta-dot {
+    color: #38bdf8;
+    opacity: 0.6;
 }
 
 /* ==========================================================================
-   Streamlit Tabs - Centered, Sky Blue Active, No Red
+   Streamlit Tabs - Segmented Floating Pill Switch (No Red, Centered)
    ========================================================================== */
 div[data-testid="stTabs"] {
     display: flex !important;
@@ -98,31 +139,40 @@ div[role="tablist"],
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
-    gap: 14px !important;
-    width: 100% !important;
-    margin: 0 auto 22px auto !important;
-    border-bottom: 1px solid #1e293b !important;
-    padding-bottom: 8px !important;
+    gap: 8px !important;
+    width: fit-content !important;
+    background: #080d16 !important;
+    padding: 6px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(56, 189, 248, 0.22) !important;
+    border-bottom: 1px solid rgba(56, 189, 248, 0.22) !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+    margin: 0 auto 24px auto !important;
 }
 
 div[data-testid="stTabs"] [data-baseweb="tab-panel"] {
     width: 100% !important;
 }
 
-/* Base Tab Button */
+/* Inactive Tab Pill */
 [data-baseweb="tab"],
 button[data-baseweb="tab"],
 div[role="tablist"] button {
-    font-size: 14.5px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 14px !important;
     font-weight: 600 !important;
-    padding: 9px 26px !important;
-    border-radius: 8px !important;
+    padding: 9px 32px !important;
+    border-radius: 10px !important;
     color: #94a3b8 !important;
-    border: none !important;
+    border: 1px solid transparent !important;
     outline: none !important;
     box-shadow: none !important;
     background: transparent !important;
-    transition: all 0.2s ease;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
 }
 
 [data-baseweb="tab"] p,
@@ -130,37 +180,45 @@ div[role="tablist"] button {
 button[data-baseweb="tab"] p,
 button[data-baseweb="tab"] span {
     color: inherit !important;
-    font-size: 14.5px !important;
+    font-size: 14px !important;
     font-weight: 600 !important;
 }
 
-/* Hover State */
 button[data-baseweb="tab"]:hover {
-    color: #38bdf8 !important;
-    background: rgba(2, 132, 199, 0.1) !important;
+    color: #f1f5f9 !important;
+    background: rgba(255, 255, 255, 0.05) !important;
 }
 
-/* Active Selected Tab - Sky Blue Matching the Action Button */
+/* Active Selected Tab Pill - Solid Sky Blue */
 button[data-baseweb="tab"][aria-selected="true"],
 div[role="tablist"] button[aria-selected="true"],
 [data-baseweb="tab"][aria-selected="true"] {
-    background-color: #0284c7 !important;
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
     color: #ffffff !important;
-    border: 1px solid #0369a1 !important;
-    outline: none !important;
-    box-shadow: 0 2px 10px rgba(2, 132, 199, 0.35) !important;
+    border: 1px solid rgba(56, 189, 248, 0.45) !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.45) !important;
 }
 
 button[data-baseweb="tab"][aria-selected="true"] p,
 button[data-baseweb="tab"][aria-selected="true"] span,
 button[data-baseweb="tab"][aria-selected="true"] div {
     color: #ffffff !important;
+    font-weight: 700 !important;
 }
 
-/* Eliminate default red highlight and outline box */
+/* Completely kill default red highlight and outline box */
 [data-baseweb="tab-highlight"],
-[data-baseweb="tab-border"] {
+[data-baseweb="tab-border"],
+div[data-baseweb="tab-highlight"],
+div[data-baseweb="tab-border"] {
     display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    width: 0 !important;
+    border: none !important;
     background-color: transparent !important;
 }
 
@@ -168,7 +226,6 @@ button[data-baseweb="tab"]:focus,
 button[data-baseweb="tab"]:focus-visible,
 button[data-baseweb="tab"]:active {
     outline: none !important;
-    border-color: #0369a1 !important;
     box-shadow: none !important;
 }
 
@@ -176,27 +233,45 @@ button[data-baseweb="tab"]:active {
    Form Inputs & Labels
    ========================================================================== */
 label[data-testid="stWidgetLabel"] p {
-    font-size: 13.5px !important;
-    font-weight: 600 !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
     color: #cbd5e1 !important;
-    margin-bottom: 4px !important;
+    margin-bottom: 6px !important;
+    letter-spacing: 0.4px !important;
+    text-transform: uppercase !important;
 }
 
 div[data-baseweb="input"] {
-    background-color: #0b1120 !important;
-    border: 1px solid #1e293b !important;
-    border-radius: 8px !important;
+    background-color: #080d16 !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 12px !important;
     color: #f8fafc !important;
-    transition: border-color 0.15s ease-in-out !important;
+    padding: 3px 6px !important;
+    transition: all 0.2s ease !important;
+}
+
+div[data-baseweb="input"]:hover {
+    border-color: rgba(56, 189, 248, 0.35) !important;
 }
 
 div[data-baseweb="input"]:focus-within {
     border-color: #0284c7 !important;
-    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.25) !important;
+    background-color: #0c1424 !important;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25), 0 0 15px rgba(14, 165, 233, 0.15) !important;
+}
+
+div[data-baseweb="input"] input {
+    color: #f8fafc !important;
+    font-size: 14.5px !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+div[data-baseweb="input"] input::placeholder {
+    color: #64748b !important;
 }
 
 /* ==========================================================================
-   Enterprise Buttons
+   Primary Action Buttons
    ========================================================================== */
 div.stButton {
     display: flex !important;
@@ -205,32 +280,48 @@ div.stButton {
 }
 
 div.stButton > button {
-    border-radius: 8px !important;
-    background: #0284c7 !important;
+    width: 100% !important;
+    border-radius: 12px !important;
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
     color: #ffffff !important;
-    font-weight: 600 !important;
-    border: 1px solid #0369a1 !important;
-    padding: 12px 28px !important;
-    font-size: 14.5px !important;
-    letter-spacing: 0.2px !important;
-    transition: all 0.15s ease-in-out !important;
+    font-weight: 700 !important;
+    border: 1px solid rgba(56, 189, 248, 0.45) !important;
+    padding: 13px 28px !important;
+    font-size: 15px !important;
+    letter-spacing: 0.3px !important;
+    box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35) !important;
+    transition: all 0.25s ease !important;
+    cursor: pointer !important;
 }
 
 div.stButton > button:hover {
-    background: #0369a1 !important;
-    border-color: #38bdf8 !important;
-    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4) !important;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%) !important;
+    border-color: #7dd3fc !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 22px rgba(14, 165, 233, 0.5) !important;
+}
+
+div.stButton > button:active {
+    transform: translateY(1px) !important;
+}
+
+div.stButton > button:focus,
+div.stButton > button:focus-visible {
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.4) !important;
 }
 
 /* ==========================================================================
    Clinical Chat View & Messages
    ========================================================================== */
 .chat-header {
-    background: #0f172a;
-    border: 1px solid #1e293b;
-    border-radius: 12px;
-    padding: 18px 24px;
-    margin-bottom: 22px;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 16px;
+    padding: 20px 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
 }
 
 .chat-header-main {
@@ -240,12 +331,12 @@ div.stButton > button:hover {
 }
 
 .chat-header-logo {
-    font-size: 30px;
+    font-size: 32px;
 }
 
 .chat-header-title {
     font-family: 'Outfit', sans-serif !important;
-    font-size: 20px !important;
+    font-size: 22px !important;
     font-weight: 700 !important;
     margin: 0 !important;
     color: #f8fafc;
@@ -254,7 +345,7 @@ div.stButton > button:hover {
 .chat-header-subtitle {
     font-size: 13px;
     color: #94a3b8;
-    margin-top: 2px;
+    margin-top: 3px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -270,18 +361,19 @@ div.stButton > button:hover {
 
 /* Welcome Card & Starter Suggestions */
 .welcome-card {
-    background: #0f172a;
-    border: 1px solid #1e293b;
-    border-radius: 12px;
-    padding: 24px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 26px;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
 }
 
 .welcome-card h3 {
-    margin: 0 0 6px 0;
+    margin: 0 0 8px 0;
     color: #f8fafc;
-    font-size: 17px;
+    font-size: 18px;
+    font-weight: 600;
 }
 
 .welcome-card p {
@@ -293,17 +385,23 @@ div.stButton > button:hover {
 .suggestion-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 26px;
+    gap: 12px;
+    margin-bottom: 28px;
 }
 
 .suggestion-pill {
-    background: #0b1120;
-    border: 1px solid #1e293b;
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-size: 13px;
+    background: #080d16;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 13px 18px;
+    font-size: 13.5px;
     color: #cbd5e1;
+    transition: all 0.2s ease;
+}
+
+.suggestion-pill:hover {
+    border-color: #38bdf8;
+    color: #38bdf8;
 }
 
 /* Chat Messages */
@@ -314,7 +412,7 @@ div.stButton > button:hover {
 
 .chat-row {
     display: flex;
-    margin-bottom: 18px;
+    margin-bottom: 20px;
 }
 
 .user-row {
@@ -326,34 +424,34 @@ div.stButton > button:hover {
 }
 
 .user-bubble {
-    background: #1e293b;
+    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
     color: #ffffff;
-    padding: 14px 18px;
-    border-radius: 12px 12px 2px 12px;
+    padding: 15px 20px;
+    border-radius: 16px 16px 2px 16px;
     max-width: 78%;
-    border: 1px solid #334155;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
 }
 
 .bubble-header {
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    color: #94a3b8;
+    color: rgba(255, 255, 255, 0.7);
     margin-bottom: 4px;
 }
 
 .bubble-body {
-    font-size: 14px;
+    font-size: 14.5px;
     line-height: 1.5;
 }
 
 .bot-card {
-    background: #0f172a;
-    border: 1px solid #1e293b;
-    border-radius: 12px 12px 12px 2px;
-    padding: 20px 24px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 16px 16px 16px 2px;
+    padding: 22px 26px;
     max-width: 86%;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
 }
 
 .bot-header {
@@ -362,11 +460,11 @@ div.stButton > button:hover {
     gap: 8px;
     margin-bottom: 14px;
     padding-bottom: 10px;
-    border-bottom: 1px solid #1e293b;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .bot-avatar {
-    font-size: 18px;
+    font-size: 20px;
 }
 
 .bot-title {
@@ -379,7 +477,7 @@ div.stButton > button:hover {
 
 /* Structured Clinical Sections */
 .med-section-card {
-    background: #0b1120;
+    background: #080d16;
     border-radius: 8px;
     padding: 12px 16px;
     margin-bottom: 10px;
@@ -418,8 +516,8 @@ div.stButton > button:hover {
 .user-profile-card {
     padding: 14px;
     background: #0f172a;
-    border-radius: 10px;
-    border: 1px solid #1e293b;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .user-name {
@@ -437,7 +535,7 @@ div.stButton > button:hover {
 .emergency-box {
     background: rgba(239, 68, 68, 0.08);
     border: 1px solid rgba(239, 68, 68, 0.25);
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 14px;
     margin-top: 16px;
 }
@@ -461,11 +559,4 @@ div.stButton > button:hover {
     font-size: 13px;
     color: #ffffff;
     margin-bottom: 4px;
-}
-
-.sidebar-info-box {
-    background: #0f172a;
-    border: 1px solid #1e293b;
-    border-radius: 8px;
-    padding: 12px 14px;
 }

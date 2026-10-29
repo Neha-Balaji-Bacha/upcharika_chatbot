@@ -200,33 +200,30 @@ def generate_voice(text, lang):
 
 # ================= AUTH UI =================
 def auth_ui():
-    with st.sidebar:
-        st.markdown("""
-        <div style="text-align: center; padding: 24px 0 16px 0;">
-            <div style="font-size: 38px; margin-bottom: 8px;">🩺</div>
-            <h3 style="margin: 0; color: #38bdf8; font-family: 'Outfit', sans-serif; font-size: 20px;">UpCharika</h3>
-            <p style="color: #64748b; font-size: 13px; margin-top: 4px;">Clinical Healthcare System</p>
-        </div>
-        """, unsafe_allow_html=True)
-        st.markdown("---")
-        st.markdown("""
-        <div class="sidebar-info-box">
-            <div style="font-weight: 600; font-size: 13px; color: #cbd5e1; margin-bottom: 6px;">Portal Access</div>
-            <p style="font-size: 13px; color: #94a3b8; line-height: 1.5; margin: 0;">
-                Please authenticate using your registered clinical or patient credentials to access the consultation portal.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+    # Hide sidebar during auth mode to ensure the login portal is perfectly centered
+    st.markdown("""
+    <style>
+        [data-testid="stSidebar"], [data-testid="collapsedControl"] {
+            display: none !important;
+        }
+        .block-container {
+            max-width: 100% !important;
+            padding-top: 2.5rem !important;
+            padding-bottom: 2rem !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
     # Centered container for professional appearance
-    col1, col2, col3 = st.columns([1, 2.2, 1])
+    col1, col2, col3 = st.columns([1, 1.4, 1])
     with col2:
         with st.container(border=True):
             st.markdown("""
             <div class="auth-header-block">
-                <div class="auth-stethoscope">🩺</div>
-                <h1 class="auth-main-title">UpCharika Clinical Portal</h1>
-                <p class="auth-sub-title">Hospital-Grade AI Healthcare Assistance and Triage System</p>
+                <div class="brand-glow-circle">🩺</div>
+                <div class="brand-badge-pill">Clinical AI Portal</div>
+                <h1 class="brand-heading">UpCharika</h1>
+                <p class="brand-caption">Hospital-Grade AI Healthcare Assistance & Triage System</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -236,10 +233,8 @@ def auth_ui():
                 st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
                 user = st.text_input("Username", key="login_user", placeholder="Enter your registered username")
                 pw = st.text_input("Password", type="password", key="login_pw", placeholder="Enter your password")
-                st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
-                b1, b2, b3 = st.columns([1, 1.4, 1])
-                with b2:
-                    btn_login = st.button("Sign In to Portal", key="btn_login", use_container_width=True)
+                st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+                btn_login = st.button("Sign In to Portal", key="btn_login", use_container_width=True)
 
                 if btn_login:
                     if not user or not pw:
@@ -262,11 +257,8 @@ def auth_ui():
                 st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
                 new_user = st.text_input("Choose Username", key="reg_user", placeholder="Enter a unique username")
                 new_pw = st.text_input("Choose Password", type="password", key="reg_pw", placeholder="Create a secure password")
-                st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
-
-                rb1, rb2, rb3 = st.columns([1, 1.4, 1])
-                with rb2:
-                    btn_reg = st.button("Create Account", key="btn_reg", use_container_width=True)
+                st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+                btn_reg = st.button("Create Account", key="btn_reg", use_container_width=True)
 
                 if btn_reg:
                     if not new_user or not new_pw:
@@ -281,10 +273,10 @@ def auth_ui():
             st.markdown("""
             <div class="auth-footer-meta">
                 <span>End-to-End Encrypted</span>
-                <span>•</span>
-                <span>Clinical LLaMA 3.1 Architecture</span>
-                <span>•</span>
-                <span>Multilingual Healthcare Guidance</span>
+                <span class="meta-dot">•</span>
+                <span>Clinical LLaMA 3.1</span>
+                <span class="meta-dot">•</span>
+                <span>Multilingual Guidance</span>
             </div>
             """, unsafe_allow_html=True)
 
