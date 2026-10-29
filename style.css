@@ -158,18 +158,78 @@ button[data-baseweb="tab"]:active {
     box-shadow: none !important;
 }
 
-/* Professional Form Inputs */
+/* Professional Form Inputs - High Contrast & Theme-Matched */
+div[data-testid="stTextInput"] label,
+div[data-testid="stTextInput"] label p {
+    color: #e2e8f0 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.2px !important;
+    margin-bottom: 6px !important;
+}
+
 div[data-baseweb="input"] {
-    background-color: #0b1120 !important;
-    border: 1px solid #1e293b !important;
-    border-radius: 8px !important;
+    background-color: #131d2e !important;
+    border: 1.5px solid #2a3a52 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+    transition: all 0.2s ease !important;
+    padding: 2px 4px !important;
+}
+
+div[data-baseweb="input"] input {
     color: #f8fafc !important;
-    transition: border-color 0.15s ease-in-out;
+    font-size: 14.5px !important;
+    background-color: transparent !important;
+}
+
+div[data-baseweb="input"] input::placeholder {
+    color: #8194ad !important;
+    opacity: 1 !important;
+}
+
+div[data-baseweb="input"]:hover {
+    border-color: #38bdf8 !important;
+    background-color: #162338 !important;
 }
 
 div[data-baseweb="input"]:focus-within {
     border-color: #0284c7 !important;
-    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2) !important;
+    background-color: #162338 !important;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25), 0 2px 10px rgba(2, 132, 199, 0.2) !important;
+}
+
+div[data-baseweb="input"] button {
+    color: #8194ad !important;
+}
+
+div[data-baseweb="input"] button:hover {
+    color: #38bdf8 !important;
+}
+
+/* Chat Input Styling */
+div[data-testid="stChatInput"] {
+    border-radius: 12px !important;
+}
+
+div[data-testid="stChatInput"] > div {
+    background-color: #131d2e !important;
+    border: 1.5px solid #2a3a52 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+div[data-testid="stChatInput"]:focus-within > div {
+    border-color: #0284c7 !important;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25) !important;
+}
+
+div[data-testid="stChatInput"] textarea {
+    color: #f8fafc !important;
+}
+
+div[data-testid="stChatInput"] textarea::placeholder {
+    color: #8194ad !important;
 }
 
 /* Enterprise Primary Button - Centered */
