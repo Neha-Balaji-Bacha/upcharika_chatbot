@@ -202,90 +202,91 @@ def generate_voice(text, lang):
 def auth_ui():
     with st.sidebar:
         st.markdown("""
-        <div style="text-align: center; padding: 24px 0 16px 0;">
-            <div style="font-size: 38px; margin-bottom: 8px;">🩺</div>
-            <h3 style="margin: 0; color: #38bdf8; font-family: 'Outfit', sans-serif; font-size: 20px;">UpCharika</h3>
-            <p style="color: #64748b; font-size: 13px; margin-top: 4px;">Clinical Healthcare System</p>
+        <div style="text-align: center; padding: 28px 0 20px 0;">
+            <div style="font-size: 44px; margin-bottom: 12px;">🩺</div>
+            <h2 style="margin: 0; color: #38bdf8; font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 700;">UpCharika</h2>
+            <p style="color: #64748b; font-size: 15px; margin-top: 6px;">Clinical Healthcare System</p>
         </div>
         """, unsafe_allow_html=True)
         st.markdown("---")
         st.markdown("""
         <div class="sidebar-info-box">
-            <div style="font-weight: 600; font-size: 13px; color: #cbd5e1; margin-bottom: 6px;">Portal Access</div>
-            <p style="font-size: 13px; color: #94a3b8; line-height: 1.5; margin: 0;">
+            <div style="font-weight: 600; font-size: 15.5px; color: #cbd5e1; margin-bottom: 8px;">Portal Access</div>
+            <p style="font-size: 14.5px; color: #94a3b8; line-height: 1.6; margin: 0;">
                 Please authenticate using your registered clinical or patient credentials to access the consultation portal.
             </p>
         </div>
         """, unsafe_allow_html=True)
 
     # Centered container for professional appearance
-    col1, col2, col3 = st.columns([1, 2, 1])
+    col1, col2, col3 = st.columns([0.7, 2.6, 0.7])
     with col2:
-        st.markdown("""
-        <div class="auth-container">
-            <div class="auth-stethoscope">🩺</div>
-            <h1 class="auth-main-title">UpCharika Clinical Portal</h1>
-            <p class="auth-sub-title">Hospital-Grade AI Healthcare Assistance and Triage System</p>
-        </div>
-        """, unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown("""
+            <div class="auth-header-block">
+                <div class="auth-stethoscope">🩺</div>
+                <h1 class="auth-main-title">UpCharika Clinical Portal</h1>
+                <p class="auth-sub-title">Hospital-Grade AI Healthcare Assistance and Triage System</p>
+            </div>
+            """, unsafe_allow_html=True)
 
-        tab_login, tab_register = st.tabs(["Sign In", "Register"])
+            tab_login, tab_register = st.tabs(["Sign In", "Register"])
 
-        with tab_login:
-            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-            user = st.text_input("Username", key="login_user", placeholder="Enter your registered username")
-            pw = st.text_input("Password", type="password", key="login_pw", placeholder="Enter your password")
-            st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
-            b1, b2, b3 = st.columns([1, 1.4, 1])
-            with b2:
-                btn_login = st.button("Sign In to Portal", key="btn_login", use_container_width=True)
+            with tab_login:
+                st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+                user = st.text_input("Username", key="login_user", placeholder="Enter your registered username")
+                pw = st.text_input("Password", type="password", key="login_pw", placeholder="Enter your password")
+                st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+                b1, b2, b3 = st.columns([0.25, 2.5, 0.25])
+                with b2:
+                    btn_login = st.button("Sign In to Portal", key="btn_login", use_container_width=True)
 
-            if btn_login:
-                if not user or not pw:
-                    st.warning("Please fill in both fields.")
-                else:
-                    ok, msg = login_user(user, pw)
-                    if ok:
-                        st.session_state.logged_in = True
-                        st.session_state.username = user
-                        st.session_state.chat_history = []
-
-                        cookies["logged_in"] = "true"
-                        cookies["username"] = user
-                        cookies.save()
-                        st.rerun()
+                if btn_login:
+                    if not user or not pw:
+                        st.warning("Please fill in both fields.")
                     else:
-                        st.error(msg)
+                        ok, msg = login_user(user, pw)
+                        if ok:
+                            st.session_state.logged_in = True
+                            st.session_state.username = user
+                            st.session_state.chat_history = []
 
-        with tab_register:
-            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-            new_user = st.text_input("Choose Username", key="reg_user", placeholder="Enter a unique username")
-            new_pw = st.text_input("Choose Password", type="password", key="reg_pw", placeholder="Create a secure password")
-            st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+                            cookies["logged_in"] = "true"
+                            cookies["username"] = user
+                            cookies.save()
+                            st.rerun()
+                        else:
+                            st.error(msg)
 
-            rb1, rb2, rb3 = st.columns([1, 1.4, 1])
-            with rb2:
-                btn_reg = st.button("Create Account", key="btn_reg", use_container_width=True)
+            with tab_register:
+                st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+                new_user = st.text_input("Choose Username", key="reg_user", placeholder="Enter a unique username")
+                new_pw = st.text_input("Choose Password", type="password", key="reg_pw", placeholder="Create a secure password")
+                st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
-            if btn_reg:
-                if not new_user or not new_pw:
-                    st.warning("Please fill in both fields.")
-                else:
-                    ok, msg = register_user(new_user, new_pw)
-                    if ok:
-                        st.success(f"{msg}. Please proceed to the Sign In tab.")
+                rb1, rb2, rb3 = st.columns([0.25, 2.5, 0.25])
+                with rb2:
+                    btn_reg = st.button("Create Account", key="btn_reg", use_container_width=True)
+
+                if btn_reg:
+                    if not new_user or not new_pw:
+                        st.warning("Please fill in both fields.")
                     else:
-                        st.error(msg)
+                        ok, msg = register_user(new_user, new_pw)
+                        if ok:
+                            st.success(f"{msg}. Please proceed to the Sign In tab.")
+                        else:
+                            st.error(msg)
 
-        st.markdown("""
-        <div class="auth-footer-meta">
-            <span>End-to-End Encrypted</span>
-            <span>•</span>
-            <span>Clinical LLaMA 3.1 Architecture</span>
-            <span>•</span>
-            <span>Multilingual Healthcare Guidance</span>
-        </div>
-        """, unsafe_allow_html=True)
+            st.markdown("""
+            <div class="auth-footer-meta">
+                <span>End-to-End Encrypted</span>
+                <span>•</span>
+                <span>Clinical LLaMA 3.1 Architecture</span>
+                <span>•</span>
+                <span>Multilingual Healthcare Guidance</span>
+            </div>
+            """, unsafe_allow_html=True)
 
 # ================= CHAT =================
 def chatbot_ui(username):
