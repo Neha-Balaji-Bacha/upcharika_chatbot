@@ -1,0 +1,439 @@
+/* Import Professional Typography */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif !important;
+}
+
+/* Background & Core Theme */
+[data-testid="stAppViewContainer"] {
+    background: #090e17 !important;
+    color: #e2e8f0;
+}
+
+[data-testid="stHeader"] {
+    background: rgba(9, 14, 23, 0.85) !important;
+    backdrop-filter: blur(8px) !important;
+    border-bottom: 1px solid #1e293b;
+}
+
+[data-testid="stSidebar"] {
+    background-color: #0b1120 !important;
+    border-right: 1px solid #1e293b !important;
+}
+
+/* Auth Portal Container - Wide, Professional, Executive */
+.auth-container {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 14px;
+    padding: 34px 44px 28px 44px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    margin-top: 15px;
+    margin-bottom: 24px;
+}
+
+.auth-stethoscope {
+    font-size: 38px;
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
+.auth-main-title {
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 26px !important;
+    font-weight: 700 !important;
+    color: #f8fafc !important;
+    margin: 0 0 6px 0 !important;
+    letter-spacing: -0.3px;
+}
+
+.auth-sub-title {
+    color: #94a3b8;
+    font-size: 14px;
+    margin: 0 0 4px 0;
+    line-height: 1.5;
+}
+
+.auth-footer-meta {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #1e293b;
+    color: #64748b;
+    font-size: 12px;
+    letter-spacing: 0.2px;
+}
+
+/* Universal Streamlit Tabs - Centered */
+div[data-testid="stTabs"] {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+div[data-testid="stTabs"] > div:first-child,
+div[data-testid="stTabs"] [data-baseweb="tab-list"],
+div[role="tablist"],
+[data-baseweb="tab-list"] {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 16px !important;
+    width: 100% !important;
+    margin: 0 auto 20px auto !important;
+    border-bottom: 1px solid #1e293b !important;
+    padding-bottom: 8px !important;
+}
+
+div[data-testid="stTabs"] [data-baseweb="tab-panel"] {
+    width: 100% !important;
+}
+
+/* Tab Buttons - Base & Text */
+[data-baseweb="tab"],
+button[data-baseweb="tab"],
+div[role="tablist"] button {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    padding: 10px 24px !important;
+    border-radius: 8px !important;
+    color: #94a3b8 !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    transition: all 0.2s ease;
+}
+
+[data-baseweb="tab"] p,
+[data-baseweb="tab"] span,
+button[data-baseweb="tab"] p,
+button[data-baseweb="tab"] span {
+    color: inherit !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+}
+
+/* Hover State */
+button[data-baseweb="tab"]:hover {
+    color: #38bdf8 !important;
+    background: rgba(2, 132, 199, 0.1) !important;
+}
+
+/* Active Selected Tab - Matching the Sky Blue Action Button */
+button[data-baseweb="tab"][aria-selected="true"],
+div[role="tablist"] button[aria-selected="true"],
+[data-baseweb="tab"][aria-selected="true"] {
+    background-color: #0284c7 !important;
+    color: #ffffff !important;
+    border: 1px solid #0369a1 !important;
+    outline: none !important;
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4) !important;
+}
+
+button[data-baseweb="tab"][aria-selected="true"] p,
+button[data-baseweb="tab"][aria-selected="true"] span,
+button[data-baseweb="tab"][aria-selected="true"] div {
+    color: #ffffff !important;
+}
+
+/* Remove default red highlight and outline box */
+[data-baseweb="tab-highlight"],
+[data-baseweb="tab-border"] {
+    display: none !important;
+    background-color: transparent !important;
+}
+
+button[data-baseweb="tab"]:focus,
+button[data-baseweb="tab"]:focus-visible,
+button[data-baseweb="tab"]:active {
+    outline: none !important;
+    border-color: #0369a1 !important;
+    box-shadow: none !important;
+}
+
+/* Professional Form Inputs */
+div[data-baseweb="input"] {
+    background-color: #0b1120 !important;
+    border: 1px solid #1e293b !important;
+    border-radius: 8px !important;
+    color: #f8fafc !important;
+    transition: border-color 0.15s ease-in-out;
+}
+
+div[data-baseweb="input"]:focus-within {
+    border-color: #0284c7 !important;
+    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2) !important;
+}
+
+/* Enterprise Primary Button - Centered */
+div.stButton {
+    display: flex !important;
+    justify-content: center !important;
+}
+
+div.stButton > button {
+    border-radius: 8px;
+    background: #0284c7 !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    border: 1px solid #0369a1 !important;
+    padding: 12px 28px !important;
+    font-size: 14px !important;
+    letter-spacing: 0.2px !important;
+    transition: background-color 0.15s ease-in-out;
+}
+
+div.stButton > button:hover {
+    background: #0369a1 !important;
+}
+
+/* Chat Header Banner */
+.chat-header {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 18px 24px;
+    margin-bottom: 22px;
+}
+
+.chat-header-main {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.chat-header-logo {
+    font-size: 30px;
+}
+
+.chat-header-title {
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    color: #f8fafc;
+}
+
+.chat-header-subtitle {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    background-color: #10b981;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* Welcome Overview */
+.welcome-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.welcome-card h3 {
+    margin: 0 0 6px 0;
+    color: #f8fafc;
+    font-size: 17px;
+}
+
+.welcome-card p {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.suggestion-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 26px;
+}
+
+.suggestion-pill {
+    background: #0b1120;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #cbd5e1;
+}
+
+/* Chat Messages */
+.chat-feed {
+    max-width: 900px;
+    margin: 0 auto 30px auto;
+}
+
+.chat-row {
+    display: flex;
+    margin-bottom: 18px;
+}
+
+.user-row {
+    justify-content: flex-end;
+}
+
+.bot-row {
+    justify-content: flex-start;
+}
+
+.user-bubble {
+    background: #1e293b;
+    color: #ffffff;
+    padding: 14px 18px;
+    border-radius: 12px 12px 2px 12px;
+    max-width: 78%;
+    border: 1px solid #334155;
+}
+
+.bubble-header {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-bottom: 4px;
+}
+
+.bubble-body {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.bot-card {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px 12px 12px 2px;
+    padding: 20px 24px;
+    max-width: 86%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+}
+
+.bot-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #1e293b;
+}
+
+.bot-avatar {
+    font-size: 18px;
+}
+
+.bot-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #38bdf8;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+/* Structured Clinical Sections */
+.med-section-card {
+    background: #0b1120;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+}
+
+.med-section-badge {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: 0.2px;
+}
+
+.med-section-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #e2e8f0;
+}
+
+.med-section-intro {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #cbd5e1;
+    margin-bottom: 10px;
+}
+
+.audio-row {
+    margin-top: -8px;
+    margin-bottom: 22px;
+    padding-left: 20px;
+    max-width: 86%;
+}
+
+/* Sidebar Components */
+.user-profile-card {
+    padding: 14px;
+    background: #0f172a;
+    border-radius: 10px;
+    border: 1px solid #1e293b;
+}
+
+.user-name {
+    font-weight: 700;
+    color: #f8fafc;
+    font-size: 15px;
+}
+
+.user-status {
+    font-size: 12px;
+    color: #10b981;
+    margin-top: 2px;
+}
+
+.emergency-box {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 16px;
+}
+
+.emergency-badge {
+    font-size: 11px;
+    font-weight: 800;
+    color: #f87171;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.emergency-box p {
+    font-size: 12px;
+    color: #fca5a5;
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+}
+
+.helpline-num {
+    font-size: 13px;
+    color: #ffffff;
+    margin-bottom: 4px;
+}
+
+.sidebar-info-box {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 12px 14px;
+}
