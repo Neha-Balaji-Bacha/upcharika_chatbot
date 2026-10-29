@@ -115,19 +115,40 @@ html, body, [class*="css"] {
     letter-spacing: 0.2px;
 }
 
-/* Professional Streamlit Tabs */
+/* Professional Streamlit Tabs - Centered */
+.stTabs {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+}
+
 .stTabs [data-baseweb="tab-list"] {
+    display: flex !important;
+    justify-content: center !important;
     gap: 12px;
     background-color: #0b1120;
     padding: 6px;
     border-radius: 10px;
     border: 1px solid #1e293b;
-    margin-bottom: 16px;
+    margin: 0 auto 20px auto !important;
+    width: fit-content !important;
+}
+
+.stTabs [data-baseweb="tab-panel"] {
+    width: 100% !important;
+}
+
+.stTabs [data-baseweb="tab-border"] {
+    display: none !important;
+}
+
+.stTabs [data-baseweb="tab-highlight"] {
+    display: none !important;
 }
 
 .stTabs [data-baseweb="tab"] {
     border-radius: 8px;
-    padding: 10px 24px;
+    padding: 10px 28px;
     color: #94a3b8;
     font-weight: 600;
     font-size: 14px;
@@ -152,15 +173,19 @@ div[data-baseweb="input"]:focus-within {
     box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2) !important;
 }
 
-/* Enterprise Primary Button */
+/* Enterprise Primary Button - Centered */
+div.stButton {
+    display: flex !important;
+    justify-content: center !important;
+}
+
 div.stButton > button {
-    width: 100%;
     border-radius: 8px;
     background: #0284c7 !important;
     color: #ffffff !important;
     font-weight: 600 !important;
     border: 1px solid #0369a1 !important;
-    padding: 11px 20px !important;
+    padding: 12px 28px !important;
     font-size: 14px !important;
     letter-spacing: 0.2px !important;
     transition: background-color 0.15s ease-in-out;
@@ -601,9 +626,12 @@ def auth_ui():
             st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
             user = st.text_input("Username", key="login_user", placeholder="Enter your registered username")
             pw = st.text_input("Password", type="password", key="login_pw", placeholder="Enter your password")
-            st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+            b1, b2, b3 = st.columns([1, 1.4, 1])
+            with b2:
+                btn_login = st.button("Sign In to Portal", key="btn_login", use_container_width=True)
 
-            if st.button("Sign In to Portal", key="btn_login"):
+            if btn_login:
                 if not user or not pw:
                     st.warning("Please fill in both fields.")
                 else:
@@ -624,9 +652,13 @@ def auth_ui():
             st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
             new_user = st.text_input("Choose Username", key="reg_user", placeholder="Enter a unique username")
             new_pw = st.text_input("Choose Password", type="password", key="reg_pw", placeholder="Create a secure password")
-            st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
-            if st.button("Create Account", key="btn_reg"):
+            rb1, rb2, rb3 = st.columns([1, 1.4, 1])
+            with rb2:
+                btn_reg = st.button("Create Account", key="btn_reg", use_container_width=True)
+
+            if btn_reg:
                 if not new_user or not new_pw:
                     st.warning("Please fill in both fields.")
                 else:
