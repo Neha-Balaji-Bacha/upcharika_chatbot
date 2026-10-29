@@ -200,7 +200,7 @@ def generate_voice(text, lang):
 
 # ================= AUTH UI =================
 def auth_ui():
-    # Executive scoped styling for authentication portal
+    # Hide sidebar during auth mode to ensure the login portal is perfectly centered
     st.markdown("""
     <style>
         [data-testid="stSidebar"], [data-testid="collapsedControl"] {
@@ -211,144 +211,18 @@ def auth_ui():
             padding-top: 3.5rem !important;
             padding-bottom: 3rem !important;
         }
-        /* Portal Card Outer Wrapper */
-        div[data-testid="stVerticalBlockBorderWrapper"],
-        div.e1lln2w84 {
-            background: linear-gradient(180deg, rgba(13, 20, 36, 0.96) 0%, rgba(8, 12, 24, 0.98) 100%) !important;
-            backdrop-filter: blur(24px) !important;
-            -webkit-backdrop-filter: blur(24px) !important;
-            border: 1.5px solid rgba(56, 189, 248, 0.3) !important;
-            border-top: 2.5px solid rgba(56, 189, 248, 0.75) !important;
-            border-radius: 28px !important;
-            padding: 48px 52px 38px 52px !important;
-            box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.95), 0 0 50px rgba(14, 165, 233, 0.18) !important;
-            max-width: 560px !important;
-            margin: 0 auto !important;
-        }
-        div[data-testid="stVerticalBlockBorderWrapper"] > div {
-            border-radius: 28px !important;
-        }
-        /* Tab list segmented toggle */
-        [data-baseweb="tab-list"],
-        div[role="tablist"] {
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
-            width: 100% !important;
-            max-width: 360px !important;
-            min-height: 52px !important;
-            background: #080d18 !important;
-            padding: 5px !important;
-            border-radius: 16px !important;
-            border: 1.5px solid rgba(56, 189, 248, 0.25) !important;
-            margin: 0 auto 24px auto !important;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
-        }
-        /* Tab buttons */
-        button[data-baseweb="tab"] {
-            flex: 1 1 50% !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            font-size: 16px !important;
-            font-weight: 600 !important;
-            padding: 11px 0 !important;
-            border-radius: 12px !important;
-            color: #94a3b8 !important;
-            border: none !important;
-            border-bottom: none !important;
-            outline: none !important;
-            background: transparent !important;
-            cursor: pointer !important;
-            transition: all 0.2s ease !important;
-        }
-        button[data-baseweb="tab"][aria-selected="true"] {
-            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
-            color: #ffffff !important;
-            font-weight: 700 !important;
-            border-radius: 12px !important;
-            box-shadow: 0 4px 14px rgba(2, 132, 199, 0.5) !important;
-        }
-        button[data-baseweb="tab"][aria-selected="true"] * {
-            color: #ffffff !important;
-            font-weight: 700 !important;
-        }
-        [data-baseweb="tab-highlight"],
-        [data-baseweb="tab-border"] {
-            display: none !important;
-            opacity: 0 !important;
-            visibility: hidden !important;
-            height: 0px !important;
-            width: 0px !important;
-        }
-        /* Input Labels */
-        label[data-testid="stWidgetLabel"] p {
-            font-size: 15.5px !important;
-            font-weight: 600 !important;
-            color: #f1f5f9 !important;
-            margin-bottom: 8px !important;
-            letter-spacing: 0.2px !important;
-        }
-        /* Input Boxes */
-        div[data-baseweb="input"] {
-            background-color: #080d16 !important;
-            border: 1.5px solid rgba(255, 255, 255, 0.14) !important;
-            border-radius: 14px !important;
-            color: #f8fafc !important;
-            min-height: 52px !important;
-            padding: 4px 16px !important;
-            transition: all 0.2s ease !important;
-        }
-        div[data-baseweb="input"]:hover {
-            border-color: rgba(56, 189, 248, 0.45) !important;
-        }
-        div[data-baseweb="input"]:focus-within {
-            border-color: #0284c7 !important;
-            background-color: #0c1424 !important;
-            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.28), 0 0 20px rgba(14, 165, 233, 0.18) !important;
-        }
-        div[data-baseweb="input"] input {
-            font-size: 16px !important;
-            color: #f8fafc !important;
-        }
-        div[data-baseweb="input"] input::placeholder {
-            font-size: 15px !important;
-            color: #64748b !important;
-        }
-        /* Buttons */
-        div.stButton > button {
-            width: 100% !important;
-            min-height: 54px !important;
-            border-radius: 14px !important;
-            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
-            color: #ffffff !important;
-            font-weight: 700 !important;
-            border: 1.5px solid rgba(56, 189, 248, 0.5) !important;
-            padding: 14px 28px !important;
-            font-size: 16.5px !important;
-            letter-spacing: 0.5px !important;
-            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4) !important;
-            transition: all 0.25s ease !important;
-            margin-top: 10px !important;
-        }
-        div.stButton > button:hover {
-            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%) !important;
-            border-color: #7dd3fc !important;
-            transform: translateY(-1.5px) !important;
-            box-shadow: 0 8px 28px rgba(14, 165, 233, 0.55) !important;
-        }
     </style>
     """, unsafe_allow_html=True)
 
     # Centered container for professional appearance
-    col1, col2, col3 = st.columns([1, 1.8, 1])
+    col1, col2, col3 = st.columns([1, 1.4, 1])
     with col2:
         with st.container(border=True):
             st.markdown("""
             <div class="auth-header-block">
                 <div class="brand-glow-circle">🩺</div>
-                <div class="brand-badge-pill">Clinical AI Portal</div>
                 <h1 class="brand-heading">UpCharika</h1>
+                <div class="brand-portal-tag">Clinical AI Portal</div>
                 <p class="brand-caption">Hospital-Grade AI Healthcare Assistance & Triage System</p>
             </div>
             """, unsafe_allow_html=True)
@@ -393,23 +267,48 @@ def auth_ui():
                             st.error(msg)
 
             st.markdown("""
-            <div class="auth-footer-meta">
-                <span>End-to-End Encrypted</span>
-                <span class="meta-dot">•</span>
-                <span>Clinical LLaMA 3.1</span>
-                <span class="meta-dot">•</span>
-                <span>Multilingual Guidance</span>
+            <div class="auth-divider">
+                <span>or</span>
+            </div>
+            <div class="trust-grid">
+                <div class="trust-item">
+                    <svg class="trust-icon-svg" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                    <span class="trust-text">End-to-End<br>Encrypted</span>
+                </div>
+                <div class="trust-item">
+                    <svg class="trust-icon-svg" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04z"/></svg>
+                    <span class="trust-text">Clinical<br>LLaMA 3.1</span>
+                </div>
+                <div class="trust-item">
+                    <svg class="trust-icon-svg" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    <span class="trust-text">Multilingual<br>Guidance</span>
+                </div>
             </div>
             """, unsafe_allow_html=True)
 
 # ================= CHAT =================
 def chatbot_ui(username):
-    # Sidebar
+    # Sidebar matching Mockup Image 2
     with st.sidebar:
         st.markdown(f"""
+        <div class="sidebar-brand">
+            <div class="sidebar-brand-icon">🩺</div>
+            <div>
+                <h3 class="sidebar-brand-title">UpCharika</h3>
+                <div class="sidebar-brand-sub">Clinical AI Portal</div>
+            </div>
+        </div>
         <div class="user-profile-card">
-            <div class="user-name">{username}</div>
-            <div class="user-status">Verified User</div>
+            <div class="user-avatar-circle">👤</div>
+            <div class="user-info">
+                <div class="user-name">{username}</div>
+                <div class="user-status-verified"><span class="verified-dot"></span> Verified User</div>
+            </div>
+        </div>
+        <div class="nav-menu">
+            <div class="nav-item active">💬 Chat Assistant</div>
+            <div class="nav-item">🕒 Consultation History</div>
+            <div class="nav-item">⚙️ Settings</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -434,20 +333,20 @@ def chatbot_ui(username):
         st.markdown("---")
         st.markdown("""
         <div class="emergency-box">
-            <div class="emergency-badge">EMERGENCY ASSISTANCE</div>
+            <div class="emergency-header">⚠️ EMERGENCY ASSISTANCE</div>
             <p>If you or someone else is experiencing critical or life-threatening symptoms:</p>
-            <div class="helpline-num">Ambulance: <b>108 / 112</b></div>
-            <div class="helpline-num">National Health Helpline: <b>1800-180-1104</b></div>
+            <div class="helpline-row">🚑 Ambulance: <b>108 / 112</b></div>
+            <div class="helpline-row">📞 National Health Helpline: <b>1800-180-1104</b></div>
         </div>
         """, unsafe_allow_html=True)
 
-        st.caption("UpCharika provides clinical triage and health information only. Always consult a licensed medical practitioner for diagnosis.")
+        st.caption("UpCharika provides clinical triage and health information support only. Always consult a licensed medical practitioner for diagnosis.")
 
-    # Main Chat View
+    # Main Chat View matching Mockup Image 2
     st.markdown("""
     <div class="chat-header">
         <div class="chat-header-main">
-            <span class="chat-header-logo">🩺</span>
+            <div class="chat-header-logo-box">🩺</div>
             <div>
                 <h2 class="chat-header-title">UpCharika Clinical Assistant</h2>
                 <div class="chat-header-subtitle"><span class="status-indicator"></span> Active Clinical Engine • LLaMA 3.1 8B</div>
@@ -467,10 +366,34 @@ def chatbot_ui(username):
             <p>Describe your symptoms, ask about medications, or request clinical triage guidance.</p>
         </div>
         <div class="suggestion-grid">
-            <div class="suggestion-pill">"Fever, persistent headache, and chills for 48 hours"</div>
-            <div class="suggestion-pill">"First-aid protocol for acute acid reflux"</div>
-            <div class="suggestion-pill">"Clinical criteria for Type 2 diabetes screening"</div>
-            <div class="suggestion-pill">"Warning signs requiring immediate emergency evaluation"</div>
+            <div class="suggestion-card">
+                <div class="suggestion-left">
+                    <div class="suggestion-icon-box">💬</div>
+                    <div class="suggestion-text">"I have fever, headache, and chills for 48 hours"</div>
+                </div>
+                <span class="suggestion-chevron">›</span>
+            </div>
+            <div class="suggestion-card">
+                <div class="suggestion-left">
+                    <div class="suggestion-icon-box">💊</div>
+                    <div class="suggestion-text">"First-aid protocol for acute acid reflux"</div>
+                </div>
+                <span class="suggestion-chevron">›</span>
+            </div>
+            <div class="suggestion-card">
+                <div class="suggestion-left">
+                    <div class="suggestion-icon-box">🩺</div>
+                    <div class="suggestion-text">"Clinical criteria for Type 2 diabetes screening"</div>
+                </div>
+                <span class="suggestion-chevron">›</span>
+            </div>
+            <div class="suggestion-card">
+                <div class="suggestion-left">
+                    <div class="suggestion-icon-box">⚠️</div>
+                    <div class="suggestion-text">"Warning signs requiring immediate emergency evaluation"</div>
+                </div>
+                <span class="suggestion-chevron">›</span>
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -492,7 +415,7 @@ def chatbot_ui(username):
             <div class="chat-row bot-row">
                 <div class="bot-card">
                     <div class="bot-header">
-                        <span class="bot-avatar">🩺</span>
+                        <div class="bot-avatar-box">🩺</div>
                         <span class="bot-title">UpCharika Clinical Assistant</span>
                     </div>
                     <div class="bot-body">{formatted_content}</div>
