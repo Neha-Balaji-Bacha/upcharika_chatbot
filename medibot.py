@@ -44,164 +44,139 @@ if not cookies.ready():
 # ================= STYLE =================
 st.markdown("""
 <style>
-/* Import Modern Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap');
+/* Import Professional Typography */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700&display=swap');
 
-/* Global Reset & Typography */
 html, body, [class*="css"] {
     font-family: 'Plus Jakarta Sans', -apple-system, sans-serif !important;
 }
 
-/* Background & Main Layout */
+/* Background & Core Theme */
 [data-testid="stAppViewContainer"] {
-    background: radial-gradient(circle at 50% 0%, #0f2027 0%, #0b1522 45%, #050811 100%) !important;
-    color: #f1f5f9;
+    background: #090e17 !important;
+    color: #e2e8f0;
 }
 
 [data-testid="stHeader"] {
-    background: rgba(11, 21, 34, 0.7) !important;
-    backdrop-filter: blur(12px) !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(9, 14, 23, 0.85) !important;
+    backdrop-filter: blur(8px) !important;
+    border-bottom: 1px solid #1e293b;
 }
 
 [data-testid="stSidebar"] {
-    background-color: #080d18 !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background-color: #0b1120 !important;
+    border-right: 1px solid #1e293b !important;
 }
 
-/* Auth Card Styles */
-.auth-card {
-    background: rgba(15, 23, 42, 0.75);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(56, 189, 248, 0.2);
-    border-radius: 24px;
-    padding: 36px 30px 20px 30px;
+/* Auth Portal Container - Wide, Professional, Executive */
+.auth-container {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 14px;
+    padding: 34px 44px 28px 44px;
     text-align: center;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(14, 165, 233, 0.15);
-    margin-top: 25px;
-    margin-bottom: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    margin-top: 15px;
+    margin-bottom: 24px;
 }
 
-.auth-icon-wrap {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 68px;
-    height: 68px;
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(16, 185, 129, 0.2));
-    border: 1px solid rgba(56, 189, 248, 0.4);
-    border-radius: 20px;
-    margin-bottom: 16px;
-    box-shadow: 0 0 25px rgba(56, 189, 248, 0.25);
+.auth-stethoscope {
+    font-size: 38px;
+    margin-bottom: 10px;
+    display: inline-block;
 }
 
-.auth-icon {
-    font-size: 34px;
-}
-
-.auth-title {
+.auth-main-title {
     font-family: 'Outfit', sans-serif !important;
-    font-size: 28px !important;
+    font-size: 26px !important;
     font-weight: 700 !important;
-    background: linear-gradient(135deg, #38bdf8 0%, #34d399 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #f8fafc !important;
     margin: 0 0 6px 0 !important;
+    letter-spacing: -0.3px;
 }
 
-.auth-desc {
+.auth-sub-title {
     color: #94a3b8;
     font-size: 14px;
-    margin: 0 0 10px 0;
+    margin: 0 0 4px 0;
     line-height: 1.5;
 }
 
-.auth-footer-badges {
+.auth-footer-meta {
     display: flex;
     justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
     margin-top: 24px;
     padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.auth-footer-badges span {
-    background: rgba(30, 41, 59, 0.6);
-    color: #94a3b8;
+    border-top: 1px solid #1e293b;
+    color: #64748b;
     font-size: 12px;
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    letter-spacing: 0.2px;
 }
 
-/* Tabs Styling */
+/* Professional Streamlit Tabs */
 .stTabs [data-baseweb="tab-list"] {
-    gap: 8px;
-    background-color: rgba(15, 23, 42, 0.8);
+    gap: 12px;
+    background-color: #0b1120;
     padding: 6px;
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    border: 1px solid #1e293b;
+    margin-bottom: 16px;
 }
 
 .stTabs [data-baseweb="tab"] {
-    border-radius: 10px;
-    padding: 10px 18px;
+    border-radius: 8px;
+    padding: 10px 24px;
     color: #94a3b8;
     font-weight: 600;
     font-size: 14px;
 }
 
 .stTabs [aria-selected="true"] {
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(16, 185, 129, 0.25)) !important;
-    color: #38bdf8 !important;
-    border: 1px solid rgba(56, 189, 248, 0.4);
+    background-color: #0284c7 !important;
+    color: #ffffff !important;
 }
 
-/* Inputs */
+/* Professional Form Inputs */
 div[data-baseweb="input"] {
-    background-color: rgba(30, 41, 59, 0.8) !important;
-    border: 1px solid rgba(148, 163, 184, 0.25) !important;
-    border-radius: 12px !important;
+    background-color: #0b1120 !important;
+    border: 1px solid #1e293b !important;
+    border-radius: 8px !important;
     color: #f8fafc !important;
-    transition: all 0.2s ease;
+    transition: border-color 0.15s ease-in-out;
 }
 
 div[data-baseweb="input"]:focus-within {
-    border-color: #38bdf8 !important;
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
-    background-color: rgba(15, 23, 42, 0.95) !important;
+    border-color: #0284c7 !important;
+    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2) !important;
 }
 
-/* Buttons */
+/* Enterprise Primary Button */
 div.stButton > button {
     width: 100%;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #0284c7 0%, #0d9488 100%) !important;
+    border-radius: 8px;
+    background: #0284c7 !important;
     color: #ffffff !important;
     font-weight: 600 !important;
-    border: none !important;
-    padding: 12px 24px !important;
-    font-size: 15px !important;
-    letter-spacing: 0.3px !important;
-    box-shadow: 0 4px 15px rgba(2, 132, 199, 0.35) !important;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: 1px solid #0369a1 !important;
+    padding: 11px 20px !important;
+    font-size: 14px !important;
+    letter-spacing: 0.2px !important;
+    transition: background-color 0.15s ease-in-out;
 }
 
 div.stButton > button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(13, 148, 136, 0.5) !important;
+    background: #0369a1 !important;
 }
 
-/* Chat Header */
+/* Chat Header Banner */
 .chat-header {
-    background: rgba(15, 23, 42, 0.65);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(56, 189, 248, 0.2);
-    border-radius: 18px;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
     padding: 18px 24px;
-    margin-bottom: 24px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    margin-bottom: 22px;
 }
 
 .chat-header-main {
@@ -211,12 +186,12 @@ div.stButton > button:hover {
 }
 
 .chat-header-logo {
-    font-size: 34px;
+    font-size: 30px;
 }
 
 .chat-header-title {
     font-family: 'Outfit', sans-serif !important;
-    font-size: 22px !important;
+    font-size: 20px !important;
     font-weight: 700 !important;
     margin: 0 !important;
     color: #f8fafc;
@@ -225,35 +200,34 @@ div.stButton > button:hover {
 .chat-header-subtitle {
     font-size: 13px;
     color: #94a3b8;
-    margin-top: 3px;
+    margin-top: 2px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
-.live-dot {
+.status-indicator {
     width: 8px;
     height: 8px;
     background-color: #10b981;
     border-radius: 50%;
     display: inline-block;
-    box-shadow: 0 0 10px #10b981;
 }
 
-/* Welcome Card & Suggestions */
+/* Welcome Overview */
 .welcome-card {
-    background: rgba(15, 23, 42, 0.5);
-    border: 1px dashed rgba(56, 189, 248, 0.25);
-    border-radius: 18px;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
     padding: 24px;
     text-align: center;
     margin-bottom: 20px;
 }
 
 .welcome-card h3 {
-    margin: 0 0 8px 0;
-    color: #e2e8f0;
-    font-size: 18px;
+    margin: 0 0 6px 0;
+    color: #f8fafc;
+    font-size: 17px;
 }
 
 .welcome-card p {
@@ -265,18 +239,17 @@ div.stButton > button:hover {
 .suggestion-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 28px;
+    gap: 10px;
+    margin-bottom: 26px;
 }
 
 .suggestion-pill {
-    background: rgba(30, 41, 59, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
+    background: #0b1120;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
     padding: 12px 16px;
     font-size: 13px;
     color: #cbd5e1;
-    transition: all 0.2s ease;
 }
 
 /* Chat Messages */
@@ -287,7 +260,7 @@ div.stButton > button:hover {
 
 .chat-row {
     display: flex;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
 
 .user-row {
@@ -299,35 +272,34 @@ div.stButton > button:hover {
 }
 
 .user-bubble {
-    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+    background: #1e293b;
     color: #ffffff;
-    padding: 14px 20px;
-    border-radius: 20px 20px 4px 20px;
+    padding: 14px 18px;
+    border-radius: 12px 12px 2px 12px;
     max-width: 78%;
-    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.3);
+    border: 1px solid #334155;
 }
 
 .bubble-header {
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.7);
+    color: #94a3b8;
     margin-bottom: 4px;
 }
 
 .bubble-body {
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.5;
 }
 
 .bot-card {
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(56, 189, 248, 0.2);
-    border-radius: 20px 20px 20px 4px;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px 12px 12px 2px;
     padding: 20px 24px;
-    max-width: 85%;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    max-width: 86%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
 }
 
 .bot-header {
@@ -336,33 +308,34 @@ div.stButton > button:hover {
     gap: 8px;
     margin-bottom: 14px;
     padding-bottom: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid #1e293b;
 }
 
 .bot-avatar {
-    font-size: 20px;
+    font-size: 18px;
 }
 
 .bot-title {
     font-size: 13px;
     font-weight: 700;
     color: #38bdf8;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
     text-transform: uppercase;
 }
 
-/* Medical Card Sections */
+/* Structured Clinical Sections */
 .med-section-card {
-    background: rgba(30, 41, 59, 0.45);
-    border-radius: 10px;
+    background: #0b1120;
+    border-radius: 8px;
     padding: 12px 16px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .med-section-badge {
     font-size: 13px;
     font-weight: 700;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
+    letter-spacing: 0.2px;
 }
 
 .med-section-text {
@@ -375,29 +348,22 @@ div.stButton > button:hover {
     font-size: 14px;
     line-height: 1.6;
     color: #cbd5e1;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .audio-row {
-    margin-top: -10px;
-    margin-bottom: 24px;
+    margin-top: -8px;
+    margin-bottom: 22px;
     padding-left: 20px;
-    max-width: 85%;
+    max-width: 86%;
 }
 
 /* Sidebar Components */
 .user-profile-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
     padding: 14px;
-    background: rgba(30, 41, 59, 0.5);
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.user-avatar {
-    font-size: 24px;
+    background: #0f172a;
+    border-radius: 10px;
+    border: 1px solid #1e293b;
 }
 
 .user-name {
@@ -407,14 +373,15 @@ div.stButton > button:hover {
 }
 
 .user-status {
-    font-size: 11px;
-    color: #34d399;
+    font-size: 12px;
+    color: #10b981;
+    margin-top: 2px;
 }
 
 .emergency-box {
-    background: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    border-radius: 14px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 10px;
     padding: 14px;
     margin-top: 16px;
 }
@@ -438,6 +405,13 @@ div.stButton > button:hover {
     font-size: 13px;
     color: #ffffff;
     margin-bottom: 4px;
+}
+
+.sidebar-info-box {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 12px 14px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -526,26 +500,20 @@ def format_medical_card(text):
             t_lower = title.lower()
             if any(k in t_lower for k in ["cause", "कारण"]):
                 color = "#f59e0b"
-                icon = "🔍"
             elif any(k in t_lower for k in ["solution", "care", "उपाय", "समाधान"]):
                 color = "#10b981"
-                icon = "💡"
             elif any(k in t_lower for k in ["medicine", "औषध"]):
                 color = "#06b6d4"
-                icon = "💊"
             elif any(k in t_lower for k in ["doctor", "डॉक्टर"]):
                 color = "#a855f7"
-                icon = "👨‍⚕️"
             elif any(k in t_lower for k in ["emergency", "तातडी", "आपात"]):
-                color = "#f43f5e"
-                icon = "🚨"
+                color = "#ef4444"
             else:
                 color = "#38bdf8"
-                icon = "📋"
 
             html += f"""
             <div class="med-section-card" style="border-left: 3px solid {color};">
-                <div class="med-section-badge" style="color: {color};">{icon} {title}</div>
+                <div class="med-section-badge" style="color: {color};">{title}</div>
                 <div class="med-section-text">{body}</div>
             </div>
             """
@@ -600,31 +568,38 @@ def generate_voice(text, lang):
 def auth_ui():
     with st.sidebar:
         st.markdown("""
-        <div style="text-align: center; padding: 20px 0;">
-            <div style="font-size: 40px; margin-bottom: 10px;">🩺</div>
-            <h3 style="margin: 0; color: #38bdf8; font-family: 'Outfit', sans-serif;">UpCharika</h3>
-            <p style="color: #94a3b8; font-size: 13px; margin-top: 4px;">Smart Healthcare Portal</p>
+        <div style="text-align: center; padding: 24px 0 16px 0;">
+            <div style="font-size: 38px; margin-bottom: 8px;">🩺</div>
+            <h3 style="margin: 0; color: #38bdf8; font-family: 'Outfit', sans-serif; font-size: 20px;">UpCharika</h3>
+            <p style="color: #64748b; font-size: 13px; margin-top: 4px;">Clinical Healthcare System</p>
         </div>
         """, unsafe_allow_html=True)
-        st.info("💡 **Welcome to UpCharika!**\nPlease sign in or register to consult with the AI medical specialist.")
+        st.markdown("---")
+        st.markdown("""
+        <div class="sidebar-info-box">
+            <div style="font-weight: 600; font-size: 13px; color: #cbd5e1; margin-bottom: 6px;">Portal Access</div>
+            <p style="font-size: 13px; color: #94a3b8; line-height: 1.5; margin: 0;">
+                Please authenticate using your registered clinical or patient credentials to access the consultation portal.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
-    col1, col2, col3 = st.columns([1, 1.4, 1])
+    # Wide, centered container for professional appearance
+    col1, col2, col3 = st.columns([0.5, 3.0, 0.5])
     with col2:
         st.markdown("""
-        <div class="auth-card">
-            <div class="auth-icon-wrap">
-                <span class="auth-icon">🩺</span>
-            </div>
-            <h1 class="auth-title">UpCharika Health</h1>
-            <p class="auth-desc">AI-Powered Clinical Guidance & Triage Assistant</p>
+        <div class="auth-container">
+            <div class="auth-stethoscope">🩺</div>
+            <h1 class="auth-main-title">UpCharika Clinical Portal</h1>
+            <p class="auth-sub-title">Hospital-Grade AI Healthcare Assistance and Triage System</p>
         </div>
         """, unsafe_allow_html=True)
 
-        tab_login, tab_register = st.tabs(["🔑 Sign In", "✨ Create Account"])
+        tab_login, tab_register = st.tabs(["Sign In", "Register"])
 
         with tab_login:
             st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-            user = st.text_input("Username", key="login_user", placeholder="Enter your username")
+            user = st.text_input("Username", key="login_user", placeholder="Enter your registered username")
             pw = st.text_input("Password", type="password", key="login_pw", placeholder="Enter your password")
             st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
@@ -647,8 +622,8 @@ def auth_ui():
 
         with tab_register:
             st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-            new_user = st.text_input("New Username", key="reg_user", placeholder="Choose a username")
-            new_pw = st.text_input("New Password", type="password", key="reg_pw", placeholder="Create a secure password")
+            new_user = st.text_input("Choose Username", key="reg_user", placeholder="Enter a unique username")
+            new_pw = st.text_input("Choose Password", type="password", key="reg_pw", placeholder="Create a secure password")
             st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
 
             if st.button("Create Account", key="btn_reg"):
@@ -657,15 +632,17 @@ def auth_ui():
                 else:
                     ok, msg = register_user(new_user, new_pw)
                     if ok:
-                        st.success(f"{msg}! Please switch to the Sign In tab.")
+                        st.success(f"{msg}. Please proceed to the Sign In tab.")
                     else:
                         st.error(msg)
 
         st.markdown("""
-        <div class="auth-footer-badges">
-            <span>🔒 End-to-End Encrypted</span>
-            <span>⚡ LLaMA 3.1 8B Engine</span>
-            <span>🌐 3 Languages</span>
+        <div class="auth-footer-meta">
+            <span>End-to-End Encrypted</span>
+            <span>•</span>
+            <span>Clinical LLaMA 3.1 Architecture</span>
+            <span>•</span>
+            <span>Multilingual Healthcare Guidance</span>
         </div>
         """, unsafe_allow_html=True)
 
@@ -675,26 +652,23 @@ def chatbot_ui(username):
     with st.sidebar:
         st.markdown(f"""
         <div class="user-profile-card">
-            <div class="user-avatar">👤</div>
-            <div>
-                <div class="user-name">{username}</div>
-                <div class="user-status">🟢 Verified Patient / User</div>
-            </div>
+            <div class="user-name">{username}</div>
+            <div class="user-status">Verified User</div>
         </div>
         """, unsafe_allow_html=True)
 
         st.markdown("---")
-        lang = st.selectbox("🌍 Consultation Language", ["English", "Hindi", "Marathi"], index=0)
+        lang = st.selectbox("Consultation Language", ["English", "Hindi", "Marathi"], index=0)
 
         st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
         col_clear, col_logout = st.columns(2)
         with col_clear:
-            if st.button("🗑️ Clear", help="Reset conversation"):
+            if st.button("Clear History", help="Reset conversation"):
                 st.session_state.chat_history = []
                 st.rerun()
         with col_logout:
-            if st.button("🚪 Logout", help="Sign out"):
+            if st.button("Sign Out", help="Sign out"):
                 st.session_state.logged_in = False
                 cookies["logged_in"] = ""
                 cookies["username"] = ""
@@ -704,14 +678,14 @@ def chatbot_ui(username):
         st.markdown("---")
         st.markdown("""
         <div class="emergency-box">
-            <div class="emergency-badge">🚨 EMERGENCY HELPLINE</div>
+            <div class="emergency-badge">EMERGENCY ASSISTANCE</div>
             <p>If you or someone else is experiencing critical or life-threatening symptoms:</p>
-            <div class="helpline-num">🚑 Ambulance: <b>108 / 112</b></div>
-            <div class="helpline-num">🏥 National Health: <b>1800-180-1104</b></div>
+            <div class="helpline-num">Ambulance: <b>108 / 112</b></div>
+            <div class="helpline-num">National Health Helpline: <b>1800-180-1104</b></div>
         </div>
         """, unsafe_allow_html=True)
 
-        st.caption("⚠️ UpCharika provides triage & health info only. Always seek a doctor's advice.")
+        st.caption("UpCharika provides clinical triage and health information only. Always consult a licensed medical practitioner for diagnosis.")
 
     # Main Chat View
     st.markdown("""
@@ -720,7 +694,7 @@ def chatbot_ui(username):
             <span class="chat-header-logo">🩺</span>
             <div>
                 <h2 class="chat-header-title">UpCharika Clinical Assistant</h2>
-                <div class="chat-header-subtitle"><span class="live-dot"></span> Clinical Engine Active • LLaMA 3.1 8B</div>
+                <div class="chat-header-subtitle"><span class="status-indicator"></span> Active Clinical Engine • LLaMA 3.1 8B</div>
             </div>
         </div>
     </div>
@@ -733,14 +707,14 @@ def chatbot_ui(username):
     if len(st.session_state.chat_history) == 0:
         st.markdown("""
         <div class="welcome-card">
-            <h3>Hello! How can I assist you with your health today?</h3>
-            <p>Describe your symptoms, ask about medications, first-aid measures, or preventive health tips.</p>
+            <h3>Welcome to UpCharika Clinical Consultation</h3>
+            <p>Describe your symptoms, ask about medications, or request clinical triage guidance.</p>
         </div>
         <div class="suggestion-grid">
-            <div class="suggestion-pill">🤒 "I have a high fever, headache, and chills"</div>
-            <div class="suggestion-pill">💊 "First-aid and home remedies for severe acid reflux"</div>
-            <div class="suggestion-pill">🩺 "What are the common early symptoms of Type 2 diabetes?"</div>
-            <div class="suggestion-pill">🚨 "What warning signs require immediate emergency care?"</div>
+            <div class="suggestion-pill">"Fever, persistent headache, and chills for 48 hours"</div>
+            <div class="suggestion-pill">"First-aid protocol for acute acid reflux"</div>
+            <div class="suggestion-pill">"Clinical criteria for Type 2 diabetes screening"</div>
+            <div class="suggestion-pill">"Warning signs requiring immediate emergency evaluation"</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -751,7 +725,7 @@ def chatbot_ui(username):
             st.markdown(f"""
             <div class="chat-row user-row">
                 <div class="user-bubble">
-                    <div class="bubble-header">👤 You</div>
+                    <div class="bubble-header">You</div>
                     <div class="bubble-body">{msg['text']}</div>
                 </div>
             </div>
@@ -763,7 +737,7 @@ def chatbot_ui(username):
                 <div class="bot-card">
                     <div class="bot-header">
                         <span class="bot-avatar">🩺</span>
-                        <span class="bot-title">UpCharika AI Medical Consultant</span>
+                        <span class="bot-title">UpCharika Clinical Assistant</span>
                     </div>
                     <div class="bot-body">{formatted_content}</div>
                 </div>
@@ -771,18 +745,18 @@ def chatbot_ui(username):
             """, unsafe_allow_html=True)
             if msg.get("audio"):
                 st.markdown("<div class='audio-row'>", unsafe_allow_html=True)
-                st.caption("🎙️ Audio Consultation:")
+                st.caption("Audio Consultation:")
                 st.audio(msg["audio"])
                 st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
     # User Input
-    user_input = st.chat_input("Ask your medical question or describe symptoms...")
+    user_input = st.chat_input("Ask a medical question or describe clinical symptoms...")
     if user_input:
         st.session_state.chat_history.append({"role": "user", "text": user_input})
 
-        with st.spinner("Analyzing symptoms & consulting medical knowledge base..."):
+        with st.spinner("Evaluating clinical inquiry..."):
             answer = get_ai_response(user_input)
             translated = translate_text(answer, lang)
 
