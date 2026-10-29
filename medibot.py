@@ -141,6 +141,7 @@ div[data-testid="stTabs"] [data-baseweb="tab-panel"] {
     width: 100% !important;
 }
 
+/* Tab Buttons - Base & Text */
 [data-baseweb="tab"],
 button[data-baseweb="tab"],
 div[role="tablist"] button {
@@ -150,16 +151,57 @@ div[role="tablist"] button {
     border-radius: 8px !important;
     color: #94a3b8 !important;
     border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    transition: all 0.2s ease;
 }
 
+[data-baseweb="tab"] p,
+[data-baseweb="tab"] span,
+button[data-baseweb="tab"] p,
+button[data-baseweb="tab"] span {
+    color: inherit !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+}
+
+/* Hover State */
+button[data-baseweb="tab"]:hover {
+    color: #38bdf8 !important;
+    background: rgba(2, 132, 199, 0.1) !important;
+}
+
+/* Active Selected Tab - Matching the Sky Blue Action Button */
 button[data-baseweb="tab"][aria-selected="true"],
-div[role="tablist"] button[aria-selected="true"] {
+div[role="tablist"] button[aria-selected="true"],
+[data-baseweb="tab"][aria-selected="true"] {
     background-color: #0284c7 !important;
+    color: #ffffff !important;
+    border: 1px solid #0369a1 !important;
+    outline: none !important;
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4) !important;
+}
+
+button[data-baseweb="tab"][aria-selected="true"] p,
+button[data-baseweb="tab"][aria-selected="true"] span,
+button[data-baseweb="tab"][aria-selected="true"] div {
     color: #ffffff !important;
 }
 
-[data-baseweb="tab-highlight"] {
+/* Remove default red highlight and outline box */
+[data-baseweb="tab-highlight"],
+[data-baseweb="tab-border"] {
     display: none !important;
+    background-color: transparent !important;
+}
+
+button[data-baseweb="tab"]:focus,
+button[data-baseweb="tab"]:focus-visible,
+button[data-baseweb="tab"]:active {
+    outline: none !important;
+    border-color: #0369a1 !important;
+    box-shadow: none !important;
 }
 
 /* Professional Form Inputs */
