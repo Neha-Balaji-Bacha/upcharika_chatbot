@@ -169,10 +169,15 @@ def format_medical_card(text):
         clean_line_no_bullet = re.sub(r"^[\d\.\-\*•\s]+", "", clean_line).strip()
 
         is_header = False
-        for kw in ["cause:", "causes:", "solution:", "solutions:", "care:", "medicine:", "medication:", "medications:", "when to see doctor:", "emergency:", "कारण:", "उपाय:", "औषध:", "औषधे:", "डॉक्टर:", "तातडी:", "आपातकालीन:"]:
-            if clean_line_no_bullet.lower().startswith(kw):
+        if ":" in clean_line_no_bullet:
+            first_part = clean_line_no_bullet.split(":", 1)[0].strip().lower()
+            header_prefixes = [
+                "cause", "causes", "solution", "solutions", "care", "medicine", "medication", "medications", "when to see doctor", "emergency",
+                "कारण", "कारणे", "उपाय", "घरगुती उपाय", "काळजी", "औषध", "औषधे", "औषधोपचार", "डॉक्टर", "तातडी", "आणीबाणी",
+                "समाधान", "दवा", "दवाई", "आपात"
+            ]
+            if any(hp in first_part for hp in header_prefixes):
                 is_header = True
-                break
 
         if is_header:
             if current_title or current_body:
@@ -197,13 +202,13 @@ def format_medical_card(text):
             t_lower = title.lower()
             if any(k in t_lower for k in ["cause", "कारण"]):
                 color = "#f59e0b"
-            elif any(k in t_lower for k in ["solution", "care", "उपाय", "समाधान"]):
+            elif any(k in t_lower for k in ["solution", "care", "उपाय", "समाधान", "काळजी"]):
                 color = "#10b981"
-            elif any(k in t_lower for k in ["medicine", "medication", "औषध"]):
+            elif any(k in t_lower for k in ["medicine", "medication", "औषध", "दवा", "दवाई"]):
                 color = "#06b6d4"
             elif any(k in t_lower for k in ["doctor", "डॉक्टर"]):
                 color = "#a855f7"
-            elif any(k in t_lower for k in ["emergency", "तातडी", "आपात"]):
+            elif any(k in t_lower for k in ["emergency", "तातडी", "आपात", "आणीबाणी"]):
                 color = "#ef4444"
             else:
                 color = "#38bdf8"
@@ -220,7 +225,7 @@ def format_medical_card(text):
     return html
 
 # ================= OFFLINE CLINICAL KNOWLEDGE BASE =================
-OFFLINE_CLINICAL_KB = {
+OFFLINE_CLINICAL_KB_EN = {
     "fever": """Cause: Viral infections (influenza, dengue, seasonal viral fevers), bacterial infections, or systemic inflammatory response triggers.
 Solution: Maintain complete bed rest, drink plenty of fluids (water, ORS, warm broths) to prevent dehydration, stay in a well-ventilated room, and apply a lukewarm damp cloth to forehead.
 Medicine: Antipyretics like Paracetamol (Acetaminophen) taken strictly according to age and body weight. Avoid aspirin in children and teenagers.
@@ -264,45 +269,170 @@ When to see doctor: Immediate emergency medical transport required without delay
 Emergency: Call 108 / 112 immediately for emergency medical transport to the nearest hospital emergency department."""
 }
 
-def match_offline_kb(prompt):
+OFFLINE_CLINICAL_KB_MR = {
+    "fever": """कारण: व्हायरल इन्फेक्शन (फ्लू, डेंग्यू, साथीचा ताप), जिवाणू संसर्ग किंवा शरीरातील दाहक प्रक्रिया.
+उपाय: पूर्ण विश्रांती घ्या, डिहायड्रेशन टाळण्यासाठी भरपूर द्रवपदार्थ (पाणी, ओआरएस, कोमट सूप) प्या, हवेशीर खोलीत राहा आणि कपाळावर कोमट पाण्याच्या घड्या ठेवा.
+औषध: डॉक्टरांच्या सल्ल्यानुसार वयोमान व वजनानुसार पॅरासिटामॉल (Paracetamol). मुले व किशोरांमध्ये ॲस्पिरिन टाळा.
+डॉक्टरांना कधी भेटावे: ताप १०२°F (३८.९°C) पेक्षा जास्त असल्यास, सलग ३ दिवसांपेक्षा जास्त राहिल्यास किंवा औषध दिल्यावरही कमी न झाल्यास.
+तातडीची मदत: तीव्र श्वास लागणे, मान ताठ होणे, अतिसुस्ती, छातीत तीव्र वेदना किंवा झटके (आचके) आल्यास ताबडतोब १०८ / ११२ वर संपर्क साधा.""",
+
+    "headache": """कारण: मानसिक ताण, डिहायड्रेशन, स्क्रीनचा जास्त वापर, झोपेचा अभाव, सायनस किंवा मायग्रेन.
+उपाय: शांत आणि अंधाऱ्या खोलीत विश्रांती घ्या, कपाळावर हलकी थंड किंवा कोमट घडी ठेवा, १-२ ग्लास पाणी प्या आणि मोबाईल स्क्रीनपासून दूर राहा.
+औषध: डॉक्टरांच्या मार्गदर्शनानुसार सौम्य वेदनाशामक जसे की पॅरासिटामॉल.
+डॉक्टरांना कधी भेटावे: डोकेदुखी ४८ तासांपेक्षा जास्त राहिल्यास, सतत वाढत गेल्यास किंवा आठवड्यातून अनेकदा होत असल्यास.
+तातडीची मदत: अचानक झालेली अत्यंत तीव्र डोकेदुखी, बोलण्यात अडखळणे, दृष्टी धूसर होणे, चेहऱ्याची किंवा शरीराची एक बाजू कमजोर पडणे.""",
+
+    "cold": """कारण: श्वसनमार्गाचा व्हायरल इन्फेक्शन (रायनोव्हायरस) ज्यामुळे नाकाच्या आतील थराला सूज येते.
+उपाय: दिवसातून दोनदा गरम पाण्याची वाफ घ्या, कोमट मिठाच्या पाण्याने गुळण्या करा, आले-तुळशीचा किंवा मध-पाण्याचा काढा प्या आणि विश्रांती घ्या.
+औषध: सलाइन नेझल ड्रॉप्स, डॉक्टरांच्या सल्ल्यानुसार ॲलर्जी-विरोधी औषधे (Antihistamines).
+डॉक्टरांना कधी भेटावे: लक्षणे १०-१४ दिवसांपेक्षा जास्त राहिल्यास, तीव्र कानदुखी, सायनसचा त्रास किंवा जास्त ताप असल्यास.
+तातडीची मदत: श्वास घेण्यास गंभीर अडचण, घरघर येणे, ओठ निळे पडणे किंवा पाणी गिळण्यास असमर्थ असणे.""",
+
+    "cough": """कारण: सर्दीनंतर घशात कफ साचणे, ब्राँकायटिस, हवेतील धूळ/ॲलर्जी किंवा ॲसिड रिफ्लक्स.
+उपाय: दिवसभर कोमट पाणी प्या, निलगिरी तेलाची वाफ घ्या, रात्री १ चमचा मध कोमट पाण्यातून घ्या (१ वर्षावरील मुलांसाठी).
+औषध: कोमट मिठाच्या पाण्याच्या गुळण्या, कोरड्या अथवा कफयुक्त खोकल्यानुसार डॉक्टरांच्या सल्ल्याने सिरप.
+डॉक्टरांना कधी भेटावे: खोकला ३ आठवड्यांपेक्षा जास्त राहिल्यास, थुंकीतून रक्त पडल्यास किंवा विनाकारण वजन कमी झाल्यास.
+तातडीची मदत: खोकल्यातून जास्त रक्त येणे, छातीत तीव्र वेदना किंवा श्वास घेण्यास अडथळा निर्माण होणे.""",
+
+    "reflux": """कारण: गॅस्ट्रोएसोफेजल रिफ्लक्स (पोटातील आम्ल अन्ननलिकेत येणे), जे मसालेदार/तळलेले अन्न, उशिरा जेवणे, चहा-कॉफी किंवा ताणामुळे होते.
+उपाय: जेवणानंतर २-३ तास झोपू नका, थंड दूध किंवा नारळ पाणी प्या, थोडे-थोडे जेवा आणि सैल कपडे वापरा.
+औषध: डॉक्टरांच्या सल्ल्यानुसार ॲन्टासिड जेल किंवा ॲसिडिटी कमी करणाऱ्या गोळ्या (H2 blockers / PPIs).
+डॉक्टरांना कधी भेटावे: आठवड्यातून २ पेक्षा जास्त वेळा ॲसिडिटीचा त्रास होणे, गिळताना त्रास होणे किंवा वारंवार उलट्या होणे.
+तातडीची मदत: छातीत दाब किंवा तीव्र जळजळ डाव्या हाताकडे अथवा जबड्याकडे पसरणे आणि घाम फुटणे (हृदयाशी संबंधित तातडीची तपासणी आवश्यक).""",
+
+    "diabetes": """कारण: स्वादुपिंडातून इन्सुलिन कमी तयार होणे किंवा पेशींद्वारे त्याचा वापर न होणे ज्यामुळे रक्तातील साखरेचे प्रमाण वाढते.
+उपाय: कमी गोड व फायबरयुक्त संतुलित आहार घ्या, दररोज ३० मिनिटे वेगाने चाला आणि नियमितपणे रक्तातील साखर तपासा.
+औषध: तज्ज्ञ डॉक्टरांच्या सल्ल्यानुसार मेटफॉर्मिन किंवा इन्सुलिनचे डोस वेळेवर घ्या.
+डॉक्टरांना कधी भेटावे: उपाशीपोटी रक्तातील साखर वारंवार १३० mg/dL पेक्षा जास्त असल्यास किंवा शरीरावरील जखम लवकर भरून न आल्यास.
+तातडीची मदत: रक्तातील साखर ३०० mg/dL पेक्षा जास्त होणे किंवा ७० mg/dL पेक्षा कमी होऊन चक्कर येणे, थरथर कापणे, बेशुद्ध पडणे.""",
+
+    "emergency": """कारण: गंभीर हृदयविकाराचा झटका, पक्षाघात (स्ट्रोक), तीव्र श्वास अडकणे, ॲनाफिलेक्सिस किंवा गंभीर अपघात.
+उपाय: रुग्णाला शांत ठेवा, मोकळ्या हवेत ठेवा, घट्ट कपडे सैल करा आणि तात्काळ १०८ / ११२ रुग्णवाहिका बोलवा.
+औषध: वैद्यकीय देखरेखीशिवाय कोणतेही औषध तोंडाने देऊ नका.
+डॉक्टरांना कधी भेटावे: विलंब न करता तात्काळ जवळच्या आपत्कालीन रुग्णालयात घेऊन जा.
+तातडीची मदत: तात्काळ १०८ किंवा ११२ वर कॉल करून रुग्णाला इमर्जन्सी वॉर्डमध्ये दाखल करा."""
+}
+
+OFFLINE_CLINICAL_KB_HI = {
+    "fever": """कारण: वायरल संक्रमण (इन्फ्लूएंजा, डेंगू, मौसमी बुखार), जीवाणु संक्रमण या शरीर की सूजन संबंधी प्रतिक्रिया।
+उपाय: पूर्ण आराम करें, डिहाइड्रेशन से बचने के लिए खूब तरल पदार्थ (पानी, ओआरएस, गुनगुना सूप) पिएं और माथे पर ताजे पानी की पट्टियां रखें।
+दवा: उम्र और वजन के अनुसार डॉक्टर की सलाह से पैरासिटामोल (Paracetamol)। बच्चों में एस्पिरिन का प्रयोग न करें।
+डॉक्टर से कब मिलें: यदि बुखार १०२°F (३८.९°C) से अधिक हो, लगातार ३ दिनों से बना रहे या दवा से कम न हो।
+आपातकालीन: सांस लेने में भारी तकलीफ, गर्दन में अकड़न, अत्यधिक बेहोशी, सीने में दर्द या दौरे पड़ने पर तुरंत १०८ / ११२ पर कॉल करें।""",
+
+    "headache": """कारण: तनाव, पानी की कमी, अत्यधिक स्क्रीन समय, नींद की कमी, साइनस या माइग्रेन।
+उपाय: शांत और अंधेरे कमरे में आराम करें, माथे पर ठंडी या गुनगुनी पट्टी रखें, १-२ गिलास पानी पिएं और मोबाइल स्क्रीन से बचें।
+दवा: चिकित्सक के परामर्श अनुसार हल्की दर्द निवारक दवा जैसे पैरासिटामोल।
+डॉक्टर से कब मिलें: यदि सिरदर्द ४८ घंटे से अधिक समय तक रहे, लगातार बढ़ता जाए या सप्ताह में कई बार हो।
+आपातकालीन: अचानक अत्यधिक तेज सिरदर्द, बोलने में लड़खड़ाहट, दृष्टि में बदलाव, चेहरे या शरीर के एक तरफ कमजोरी होना।""",
+
+    "cold": """कारण: ऊपरी श्वसन तंत्र का वायरल संक्रमण (राइनोवायरस) जिससे नाक की अंदरूनी झिल्ली में सूजन आ जाती है।
+उपाय: दिन में दो बार गर्म पानी की भाप लें, गुनगुने नमक के पानी से गरारे करें, अदरक-तुलसी की चाय पिएं और आराम करें।
+दवा: सलाइन नेजल ड्रॉप्स, डॉक्टर की सलाह से एंटीहिस्टामाइन (एलर्जी रोधी दवा)।
+डॉक्टर से कब मिलें: लक्षण १०-१४ दिनों से अधिक समय तक रहें, कान में तेज दर्द हो या तेज बुखार बना रहे।
+आपातकालीन: सांस लेने में अत्यधिक कठिनाई, होंठ नीले पड़ना या तरल पदार्थ निगलने में असमर्थ होना।""",
+
+    "cough": """कारण: सर्दी के बाद बलगम गिरना, ब्रोंकाइटिस, धूल-मिट्टी से एलर्जी या एसिड रिफ्लक्स।
+उपाय: दिनभर गुनगुना पानी पिएं, नीलगिरी तेल की भाप लें, रात में गुनगुने पानी में १ चम्मच शहद मिलाकर लें (१ वर्ष से बड़े बच्चों के लिए)।
+दवा: नमक के पानी से गरारे करें, सूखी या बलगम वाली खांसी के अनुसार डॉक्टर की सलाह से कफ सिरप लें।
+डॉक्टर से कब मिलें: खांसी ३ सप्ताह से अधिक समय तक रहे, बलगम में खून आए या अचानक वजन कम हो।
+आपातकालीन: खांसी में अधिक खून आना, सीने में तेज दर्द या सांस लेने में भारी रुकावट।""",
+
+    "reflux": """कारण: पेट का एसिड भोजन नली में वापस आना (एसिड रिफ्लक्स), जो मसालेदार भोजन, देर से खाने, कैफीन या तनाव के कारण होता है।
+उपाय: खाने के बाद २-३ घंटे तक न लेटें, ठंडा दूध या नारियल पानी पिएं, थोड़ी-थोड़ी मात्रा में भोजन करें और ढीले कपड़े पहनें।
+दवा: डॉक्टर की सलाह से एंटासिड सिरप या एसिडिटी की गोलियां (जैसे Pantoprazole / Omeprazole)।
+डॉक्टर से कब मिलें: सप्ताह में २ से अधिक बार एसिडिटी होना, निगलने में दर्द या बार-बार उल्टी होना।
+आपातकालीन: सीने में भारी दबाव या दर्द जो बाएं हाथ या जबड़े तक फैले और साथ में पसीना आए (हार्ट अटैक का लक्षण हो सकता है)।""",
+
+    "diabetes": """कारण: अग्न्याशय द्वारा पर्याप्त इंसुलिन न बनना या कोशिकाओं द्वारा इंसुलिन का उपयोग न हो पाना, जिससे ब्लड शुगर बढ़ता है।
+उपाय: संतुलित कम ग्लाइसेमिक आहार लें, रोजाना ३० मिनट तेज टहलें और नियमित रूप से फास्टिंग ब्लड शुगर की जांच करें।
+दवा: एंडोक्रिनोलॉजिस्ट या डॉक्टर द्वारा निर्धारित दवाइयां (जैसे मेटफॉर्मिन) या इंसुलिन समय पर लें।
+डॉक्टर से कब मिलें: खाली पेट ब्लड शुगर लगातार १३० mg/dL से अधिक रहे या चोट/घाव ठीक होने में बहुत समय लगे।
+आपातकालीन: ब्लड शुगर ३०० mg/dL से अधिक होना या ७० mg/dL से कम होकर कंपकंपी, अत्यधिक पसीना, चक्कर या बेहोशी आना।""",
+
+    "emergency": """कारण: गंभीर दिल का दौरा, स्ट्रोक, सांस रुकना, तीव्र एलर्जी (एनाफिलेक्सिस) या गंभीर दुर्घटना।
+उपाय: मरीज को शांत रखें, आरामदायक स्थिति में लिटाएं, तंग कपड़े ढीले करें और तुरंत एम्बुलेंस बुलाएं।
+दवा: डॉक्टरी देखरेख के बिना मुंह से कोई दवा न दें।
+डॉक्टर से कब मिलें: बिना किसी देरी के तुरंत नजदीकी आपातकालीन अस्पताल ले जाएं।
+आपातकालीन: तुरंत १०८ या ११२ पर कॉल करें और मरीज को इमरजेंसी विभाग में पहुंचाएं।"""
+}
+
+OFFLINE_CLINICAL_KB = OFFLINE_CLINICAL_KB_EN
+
+def match_offline_kb(prompt, lang="English"):
     p_lower = prompt.lower()
-    for key, content in OFFLINE_CLINICAL_KB.items():
+    matched_key = None
+
+    for key in OFFLINE_CLINICAL_KB_EN.keys():
         if key in p_lower:
-            return content
-    if any(w in p_lower for w in ["ताप", "बुखार", "temperature", "chills"]):
-        return OFFLINE_CLINICAL_KB["fever"]
-    if any(w in p_lower for w in ["सिरदर्द", "डोकेदुखी", "migraine"]):
-        return OFFLINE_CLINICAL_KB["headache"]
-    if any(w in p_lower for w in ["सर्दी", "खोकला", "flu", "sneeze"]):
-        return OFFLINE_CLINICAL_KB["cold"]
-    if any(w in p_lower for w in ["acidity", "acid", "heartburn", "gastric", "पित्त", "एसिडिटी"]):
-        return OFFLINE_CLINICAL_KB["reflux"]
-    if any(w in p_lower for w in ["मधुमेह", "sugar", "glucose"]):
-        return OFFLINE_CLINICAL_KB["diabetes"]
-    if any(w in p_lower for w in ["warning signs", "danger", "critical", "तातडी", "आपात"]):
-        return OFFLINE_CLINICAL_KB["emergency"]
+            matched_key = key
+            break
+
+    if not matched_key:
+        if any(w in p_lower for w in ["ताप", "बुखार", "temperature", "chills", "fever"]):
+            matched_key = "fever"
+        elif any(w in p_lower for w in ["सिरदर्द", "डोकेदुखी", "migraine", "headache"]):
+            matched_key = "headache"
+        elif any(w in p_lower for w in ["सर्दी", "cold", "flu", "sneeze"]):
+            matched_key = "cold"
+        elif any(w in p_lower for w in ["खोकला", "खांसी", "cough"]):
+            matched_key = "cough"
+        elif any(w in p_lower for w in ["acidity", "acid", "heartburn", "gastric", "पित्त", "एसिडिटी", "reflux"]):
+            matched_key = "reflux"
+        elif any(w in p_lower for w in ["मधुमेह", "शुगर", "sugar", "glucose", "diabetes"]):
+            matched_key = "diabetes"
+        elif any(w in p_lower for w in ["warning signs", "danger", "critical", "तातडी", "आपात", "emergency"]):
+            matched_key = "emergency"
+
+    if matched_key:
+        if lang == "Marathi":
+            return OFFLINE_CLINICAL_KB_MR.get(matched_key, OFFLINE_CLINICAL_KB_EN[matched_key])
+        elif lang == "Hindi":
+            return OFFLINE_CLINICAL_KB_HI.get(matched_key, OFFLINE_CLINICAL_KB_EN[matched_key])
+        else:
+            return OFFLINE_CLINICAL_KB_EN[matched_key]
     return None
 
 # ================= AI =================
-def get_ai_response(prompt):
+def get_ai_response(prompt, lang="English"):
     active_client = get_groq_client()
     if active_client:
         try:
+            lang_instruction = ""
+            if lang == "Marathi":
+                lang_instruction = """CRITICAL: You MUST write your ENTIRE response in Marathi (मराठी).
+Use these exact Marathi medical section headers:
+कारण:
+उपाय:
+औषध:
+डॉक्टरांना कधी भेटावे:
+तातडीची मदत:"""
+            elif lang == "Hindi":
+                lang_instruction = """CRITICAL: You MUST write your ENTIRE response in Hindi (हिन्दी).
+Use these exact Hindi medical section headers:
+कारण:
+उपाय:
+दवा:
+डॉक्टर से कब मिलें:
+आपातकालीन:"""
+            else:
+                lang_instruction = """Format your advice using these clear medical sections:
+Cause:
+Solution:
+Medicine:
+When to see doctor:
+Emergency:"""
+
             response = active_client.chat.completions.create(
                 model="llama-3.1-8b-instant",
                 messages=[
                     {
                         "role": "system",
-                        "content": """You are UpCharika, a clinical AI healthcare assistant.
+                        "content": f"""You are UpCharika, a clinical AI healthcare assistant.
 Provide structured, professional medical guidance.
 
 Do NOT use asterisks, markdown symbols (*, **, ==) or bold formatting.
-Format your advice using these clear medical sections:
-Cause:
-Solution:
-Medicine:
-When to see doctor:
-Emergency:
+{lang_instruction}
 
 Always conclude by reminding the patient that this is triage support and to consult a licensed physician for definitive medical decisions."""
                     },
@@ -317,27 +447,107 @@ Always conclude by reminding the patient that this is triage support and to cons
             pass
 
     # Fallback to offline clinical knowledge base if prompt matches common symptoms
-    offline_ans = match_offline_kb(prompt)
+    offline_ans = match_offline_kb(prompt, lang=lang)
     if offline_ans:
         return offline_ans
 
-    # If neither Groq nor offline KB answered, show a clear guidance notice
-    return (
-        "⚠️ Notice: UpCharika requires a configured Groq API Key for open-ended queries.\n\n"
-        "• On Streamlit Community Cloud: Go to App Settings ➔ Secrets and enter:\n"
-        'GROQ_API_KEY = "your_groq_api_key"\n\n'
-        "• Locally: Add GROQ_API_KEY=your_key in your .env file.\n\n"
-        "You can also ask about: Fever, Headache, Cold, Cough, Acid Reflux, or Diabetes."
-    )
+    # If neither Groq nor offline KB answered, show a clear guidance notice in the chosen language
+    if lang == "Marathi":
+        return (
+            "⚠️ सूचना: इतर सर्वसमावेशक प्रश्नांसाठी Groq API Key ची आवश्यकता आहे.\n\n"
+            "• Streamlit Community Cloud वर: App Settings ➔ Secrets मध्ये जाऊन नोंदवा:\n"
+            'GROQ_API_KEY = "your_groq_api_key"\n\n'
+            "• स्थानिक पातळीवर: तुमच्या .env फाईलमध्ये GROQ_API_KEY=your_key जोडा.\n\n"
+            "तुम्ही खालील आजारांविषयी विचारू शकता: ताप, डोकेदुखी, सर्दी, खोकला, ॲसिडिटी किंवा मधुमेह."
+        )
+    elif lang == "Hindi":
+        return (
+            "⚠️ सूचना: अन्य प्रश्नों के लिए Groq API Key कॉन्फ़िगर करना आवश्यक है।\n\n"
+            "• Streamlit Community Cloud पर: App Settings ➔ Secrets में दर्ज करें:\n"
+            'GROQ_API_KEY = "your_groq_api_key"\n\n'
+            "• स्थानीय रूप से: अपनी .env फ़ाइल में GROQ_API_KEY=your_key जोड़ें।\n\n"
+            "आप निम्न लक्षणों के बारे में पूछ सकते हैं: बुखार, सिरदर्द, सर्दी, खांसी, एसिडिटी या मधुमेह।"
+        )
+    else:
+        return (
+            "⚠️ Notice: UpCharika requires a configured Groq API Key for open-ended queries.\n\n"
+            "• On Streamlit Community Cloud: Go to App Settings ➔ Secrets and enter:\n"
+            'GROQ_API_KEY = "your_groq_api_key"\n\n'
+            "• Locally: Add GROQ_API_KEY=your_key in your .env file.\n\n"
+            "You can also ask about: Fever, Headache, Cold, Cough, Acid Reflux, or Diabetes."
+        )
 
 # ================= TRANSLATION =================
 def translate_text(text, lang):
     if not text or lang == "English":
         return text
+
+    target_lang_clean = lang.strip().capitalize()
+
+    # 1. Direct offline clinical dictionary match
+    for key, en_content in OFFLINE_CLINICAL_KB_EN.items():
+        if text.strip() == en_content.strip():
+            if target_lang_clean == "Marathi":
+                return OFFLINE_CLINICAL_KB_MR[key]
+            elif target_lang_clean == "Hindi":
+                return OFFLINE_CLINICAL_KB_HI[key]
+
+    for key, mr_content in OFFLINE_CLINICAL_KB_MR.items():
+        if text.strip() == mr_content.strip():
+            if target_lang_clean == "Marathi":
+                return mr_content
+            elif target_lang_clean == "Hindi":
+                return OFFLINE_CLINICAL_KB_HI[key]
+            elif target_lang_clean == "English":
+                return OFFLINE_CLINICAL_KB_EN[key]
+
+    for key, hi_content in OFFLINE_CLINICAL_KB_HI.items():
+        if text.strip() == hi_content.strip():
+            if target_lang_clean == "Hindi":
+                return hi_content
+            elif target_lang_clean == "Marathi":
+                return OFFLINE_CLINICAL_KB_MR[key]
+            elif target_lang_clean == "English":
+                return OFFLINE_CLINICAL_KB_EN[key]
+
+    # 2. Use Groq AI translation if available (reliable, high accuracy, bypasses scraper blocks)
+    active_client = get_groq_client()
+    if active_client:
+        try:
+            resp = active_client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": f"""You are a professional medical translator.
+Translate the medical text accurately into {target_lang_clean}.
+Preserve clear medical section headers (e.g. Cause:, Solution:, Medicine:, When to see doctor:, Emergency: translated into {target_lang_clean}).
+Do NOT use asterisks, markdown symbols (*, **, ==) or bold formatting.
+Return ONLY the translated text."""
+                    },
+                    {"role": "user", "content": text}
+                ],
+                temperature=0.2
+            )
+            t_content = resp.choices[0].message.content
+            if t_content and len(t_content.strip()) > 0:
+                return t_content.strip()
+        except Exception:
+            pass
+
+    # 3. Use deep_translator with ISO code fallback
+    try:
+        lang_code = "mr" if target_lang_clean == "Marathi" else ("hi" if target_lang_clean == "Hindi" else lang.lower())
+        return GoogleTranslator(source="auto", target=lang_code).translate(text)
+    except Exception:
+        pass
+
     try:
         return GoogleTranslator(source="auto", target=lang.lower()).translate(text)
     except Exception:
-        return text
+        pass
+
+    return text
 
 # ================= VOICE =================
 def generate_voice(text, lang):
@@ -362,10 +572,19 @@ def auth_ui():
         [data-testid="stSidebar"], [data-testid="collapsedControl"] {
             display: none !important;
         }
+        [data-testid="stAppViewContainer"] > .main {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: flex-start !important;
+        }
         .block-container {
-            max-width: 100% !important;
-            padding-top: 3rem !important;
+            max-width: 460px !important;
+            width: 100% !important;
+            margin: 0 auto !important;
+            padding-top: 3.5rem !important;
             padding-bottom: 2.5rem !important;
+            padding-left: 1.25rem !important;
+            padding-right: 1.25rem !important;
         }
 
         /* Fluid background matching Mockup 1 */
@@ -373,15 +592,19 @@ def auth_ui():
             background: radial-gradient(100% 100% at 50% 0%, #eff6ff 0%, #f8fafc 50%, #ede9fe 100%) !important;
         }
 
-        /* Card Container in col2 */
-        div[data-testid="stVerticalBlockBorderWrapper"]:not(div[data-testid="stHorizontalBlock"] *) {
+        /* Card Container - robust professional 460px width */
+        div[data-testid="stVerticalBlockBorderWrapper"]:not(div[data-testid="stHorizontalBlock"] *),
+        div[data-testid="stContainer"]:has(.auth-header-block),
+        div[data-testid="stVerticalBlock"]:has(.auth-header-block) > div:has(.auth-header-block),
+        div:has(> div .auth-header-block) {
             background: #ffffff !important;
             border: 1.5px solid #e2e8f0 !important;
-            border-radius: 36px !important;
-            box-shadow: 0 25px 60px -15px rgba(99, 102, 241, 0.16), 0 0 1px 1px rgba(226, 232, 240, 0.8) !important;
-            padding: 42px 38px 36px 38px !important;
+            border-radius: 28px !important;
+            box-shadow: 0 20px 50px -15px rgba(99, 102, 241, 0.16), 0 0 1px 1px rgba(226, 232, 240, 0.8) !important;
+            padding: 38px 32px 30px 32px !important;
             max-width: 460px !important;
-            margin: 20px auto !important;
+            width: 100% !important;
+            margin: 0 auto !important;
             overflow: hidden !important;
         }
 
@@ -653,6 +876,18 @@ def auth_ui():
 
 # ================= CHAT =================
 def chatbot_ui(username):
+    st.markdown("""
+    <style>
+        .block-container {
+            max-width: 100% !important;
+            padding-top: 1.5rem !important;
+            padding-bottom: 2rem !important;
+            padding-left: 2rem !important;
+            padding-right: 2rem !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
     # Sidebar matching Mockup Image 2
     with st.sidebar:
         st.markdown(f"""
@@ -677,8 +912,28 @@ def chatbot_ui(username):
         </div>
         """, unsafe_allow_html=True)
 
+        if "selected_lang" not in st.session_state:
+            st.session_state.selected_lang = "English"
+
         st.markdown("---")
-        lang = st.selectbox("Consultation Language", ["English", "Hindi", "Marathi"], index=0)
+        lang_list = ["English", "Hindi", "Marathi"]
+        curr_idx = lang_list.index(st.session_state.selected_lang) if st.session_state.selected_lang in lang_list else 0
+        lang = st.selectbox("Consultation Language", lang_list, index=curr_idx)
+
+        # Re-translate existing conversation dynamically if user switches language in sidebar
+        if lang != st.session_state.selected_lang:
+            st.session_state.selected_lang = lang
+            for msg in st.session_state.chat_history:
+                if msg.get("role") == "bot":
+                    raw_src = msg.get("raw_text", msg.get("text", ""))
+                    re_trans = translate_text(raw_src, lang)
+                    msg["text"] = re_trans
+                    try:
+                        clean_t = clean_text_for_voice(re_trans)
+                        msg["audio"] = generate_voice(clean_t, lang)
+                    except Exception:
+                        pass
+            st.rerun()
 
         st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
@@ -732,12 +987,27 @@ def chatbot_ui(username):
         </div>
         """, unsafe_allow_html=True)
 
-        suggestions = [
-            ("💬", "I have fever, headache, and chills for 48 hours"),
-            ("💊", "First-aid protocol for acute acid reflux"),
-            ("🩺", "Clinical criteria for Type 2 diabetes screening"),
-            ("⚠️", "Warning signs requiring immediate emergency evaluation"),
-        ]
+        suggestions_map = {
+            "English": [
+                ("💬", "I have fever, headache, and chills for 48 hours"),
+                ("💊", "First-aid protocol for acute acid reflux"),
+                ("🩺", "Clinical criteria for Type 2 diabetes screening"),
+                ("⚠️", "Warning signs requiring immediate emergency evaluation"),
+            ],
+            "Marathi": [
+                ("💬", "मला २ दिवसांपासून ताप, डोकेदुखी आणि थंडी भरली आहे"),
+                ("💊", "तीव्र ॲसिडिटी / पित्तासाठी तातडीचे प्रथमोपचार"),
+                ("🩺", "टाईप २ मधुमेहाची लक्षणे व तपासणी निकष"),
+                ("⚠️", "तातडीने रुग्णालयात जाण्याची आवश्यकता असणारी धोक्याची लक्षणे"),
+            ],
+            "Hindi": [
+                ("💬", "मुझे २ दिनों से बुखार, सिरदर्द और ठंड लग रही है"),
+                ("💊", "तीव्र एसिडिटी / गैस के लिए प्राथमिक उपचार"),
+                ("🩺", "टाइप २ डायबिटीज के लक्षण और जांच के नियम"),
+                ("⚠️", "तत्काल आपातकालीन चिकित्सा की आवश्यकता वाले खतरे के संकेत"),
+            ]
+        }
+        suggestions = suggestions_map.get(lang, suggestions_map["English"])
         col_s1, col_s2 = st.columns(2)
         for idx, (icon, text) in enumerate(suggestions):
             col = col_s1 if idx % 2 == 0 else col_s2
@@ -746,7 +1016,7 @@ def chatbot_ui(username):
                     st.session_state.chat_history.append({"role": "user", "text": text})
                     with st.spinner("Evaluating clinical inquiry..."):
                         try:
-                            ans = get_ai_response(text)
+                            ans = get_ai_response(text, lang=lang)
                             trans = translate_text(ans, lang)
                         except Exception as e:
                             trans = f"⚠️ Clinical Service Notice: {str(e)}"
@@ -761,6 +1031,7 @@ def chatbot_ui(username):
                         st.session_state.chat_history.append({
                             "role": "bot",
                             "text": trans,
+                            "raw_text": ans,
                             "audio": audio
                         })
                     st.rerun()
@@ -799,13 +1070,19 @@ def chatbot_ui(username):
     st.markdown("</div>", unsafe_allow_html=True)
 
     # User Input
-    user_input = st.chat_input("Ask a medical question or describe clinical symptoms...")
+    input_placeholders = {
+        "English": "Ask a medical question or describe clinical symptoms...",
+        "Marathi": "वैद्यकीय प्रश्न विचारा किंवा लक्षणांचे वर्णन करा...",
+        "Hindi": "चिकित्सीय प्रश्न पूछें या लक्षणों का वर्णन करें..."
+    }
+    chat_placeholder = input_placeholders.get(lang, input_placeholders["English"])
+    user_input = st.chat_input(chat_placeholder)
     if user_input:
         st.session_state.chat_history.append({"role": "user", "text": user_input})
 
         with st.spinner("Evaluating clinical inquiry..."):
             try:
-                answer = get_ai_response(user_input)
+                answer = get_ai_response(user_input, lang=lang)
                 translated = translate_text(answer, lang)
             except Exception as e:
                 translated = f"⚠️ Clinical Service Notice: {str(e)}"
@@ -820,6 +1097,7 @@ def chatbot_ui(username):
             st.session_state.chat_history.append({
                 "role": "bot",
                 "text": translated,
+                "raw_text": answer,
                 "audio": audio
             })
         st.rerun()
