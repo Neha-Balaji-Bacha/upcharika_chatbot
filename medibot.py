@@ -28,6 +28,11 @@ if not hasattr(st, "cache"):
     st.cache = st.cache_data
 
 from streamlit_cookies_manager import EncryptedCookieManager
+try:
+    from langchain_huggingface import HuggingFaceEmbeddings
+except Exception:
+    from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import FAISS
 
 # ================= GOOGLE DRIVE VECTORSTORE =================
 VECTOR_URL = "https://drive.google.com/uc?id=1UunmpU4iudJycj-OibngzcJf18nA6OmR"
@@ -40,6 +45,34 @@ def load_vectorstore():
                 zip_ref.extractall("vectorstore")
 
             os.remove("vs.zip")
+
+@st.cache_resource(show_spinner=False)
+def get_vectorstore():
+    try:
+        faiss_path = "vectorstore/db_faiss"
+        if os.path.exists(os.path.join(faiss_path, "index.faiss")):
+            embed = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+            return FAISS.load_local(faiss_path, embed, allow_dangerous_deserialization=True)
+    except Exception as e:
+        print(f"Error loading FAISS vectorstore: {e}")
+    return None
+
+def retrieve_medical_context(query, k=2):
+    db = get_vectorstore()
+    if not db:
+        return ""
+    try:
+        docs = db.similarity_search(query, k=k)
+        if docs:
+            snippets = []
+            for d in docs:
+                txt = d.page_content.strip()
+                if txt:
+                    snippets.append(txt)
+            return "\n\n".join(snippets)
+    except Exception as e:
+        print(f"Retrieval error: {e}")
+    return ""
 
 # ================= COOKIES =================
 cookies = EncryptedCookieManager(
@@ -413,6 +446,10 @@ def call_groq_chat(client, messages, temperature=0.3):
     return None
 
 def get_ai_response(prompt, lang="English"):
+    # 1. RAG Step: Retrieve verified medical textbook context from FAISS
+    context = retrieve_medical_context(prompt, k=2)
+    has_rag = bool(context and len(context.strip()) > 30)
+
     active_client = get_groq_client()
     if active_client:
         try:
@@ -441,6 +478,14 @@ Medicine:
 When to see doctor:
 Emergency:"""
 
+            context_block = ""
+            if has_rag:
+                context_block = f"""Verified Medical Reference Context (from Clinical Textbook):
+\"\"\"
+{context}
+\"\"\"
+Carefully incorporate and ground your clinical advice in the above textbook findings."""
+
             ans = call_groq_chat(
                 active_client,
                 [
@@ -452,6 +497,8 @@ Provide structured, professional medical guidance.
 Do NOT use asterisks, markdown symbols (*, **, ==) or bold formatting.
 {lang_instruction}
 
+{context_block}
+
 Always conclude by reminding the patient that this is triage support and to consult a licensed physician for definitive medical decisions."""
                     },
                     {"role": "user", "content": prompt}
@@ -459,16 +506,21 @@ Always conclude by reminding the patient that this is triage support and to cons
                 temperature=0.3
             )
             if ans and len(ans.strip()) > 0:
-                return ans
+                source = "rag" if has_rag else "groq"
+                return ans, source
         except Exception:
             pass
 
-    # Fallback to offline clinical knowledge base if prompt matches common symptoms
+    # 2. Fallback to offline clinical knowledge base if prompt matches common symptoms
     offline_ans = match_offline_kb(prompt, lang=lang)
     if offline_ans:
-        return offline_ans
+        return offline_ans, "offline"
 
-    # If neither Groq nor offline KB answered, show a clear guidance notice in the chosen language
+    # 3. If offline but textbook context is available, format from textbook context directly
+    if has_rag:
+        return f"Cause: Based on clinical textbook findings:\n{context[:400]}...", "rag"
+
+    # 4. If neither Groq nor offline KB answered, show a clear guidance notice in the chosen language
     if lang == "Marathi":
         return (
             "⚠️ सूचना: इतर सर्वसमावेशक प्रश्नांसाठी Groq API Key ची आवश्यकता आहे.\n\n"
@@ -476,7 +528,7 @@ Always conclude by reminding the patient that this is triage support and to cons
             'GROQ_API_KEY = "your_groq_api_key"\n\n'
             "• स्थानिक पातळीवर: तुमच्या .env फाईलमध्ये GROQ_API_KEY=your_key जोडा.\n\n"
             "तुम्ही खालील आजारांविषयी विचारू शकता: ताप, डोकेदुखी, सर्दी, खोकला, ॲसिडिटी किंवा मधुमेह."
-        )
+        ), "notice"
     elif lang == "Hindi":
         return (
             "⚠️ सूचना: अन्य प्रश्नों के लिए Groq API Key कॉन्फ़िगर करना आवश्यक है।\n\n"
@@ -484,7 +536,7 @@ Always conclude by reminding the patient that this is triage support and to cons
             'GROQ_API_KEY = "your_groq_api_key"\n\n'
             "• स्थानीय रूप से: अपनी .env फ़ाइल में GROQ_API_KEY=your_key जोड़ें।\n\n"
             "आप निम्न लक्षणों के बारे में पूछ सकते हैं: बुखार, सिरदर्द, सर्दी, खांसी, एसिडिटी या मधुमेह।"
-        )
+        ), "notice"
     else:
         return (
             "⚠️ Notice: UpCharika requires a configured Groq API Key for open-ended queries.\n\n"
@@ -492,7 +544,7 @@ Always conclude by reminding the patient that this is triage support and to cons
             'GROQ_API_KEY = "your_groq_api_key"\n\n'
             "• Locally: Add GROQ_API_KEY=your_key in your .env file.\n\n"
             "You can also ask about: Fever, Headache, Cold, Cough, Acid Reflux, or Diabetes."
-        )
+        ), "notice"
 
 # ================= TRANSLATION =================
 def translate_text(text, lang):
@@ -1036,10 +1088,12 @@ def chatbot_ui(username):
                     st.session_state.chat_history.append({"role": "user", "text": text})
                     with st.spinner("Evaluating clinical inquiry..."):
                         try:
-                            ans = get_ai_response(text, lang=lang)
+                            ans, source = get_ai_response(text, lang=lang)
                             trans = translate_text(ans, lang)
                         except Exception as e:
+                            ans = str(e)
                             trans = f"⚠️ Clinical Service Notice: {str(e)}"
+                            source = "notice"
 
                         audio = None
                         try:
@@ -1052,7 +1106,8 @@ def chatbot_ui(username):
                             "role": "bot",
                             "text": trans,
                             "raw_text": ans,
-                            "audio": audio
+                            "audio": audio,
+                            "source": source
                         })
                     st.rerun()
 
@@ -1070,12 +1125,22 @@ def chatbot_ui(username):
             """, unsafe_allow_html=True)
         else:
             formatted_content = format_medical_card(msg['text'])
+            source_badge = ""
+            msg_source = msg.get("source")
+            if msg_source == "rag":
+                source_badge = '<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#eff6ff; color:#1d4ed8; padding:3px 10px; border-radius:12px; border:1px solid #bfdbfe; font-weight:600; margin-left:10px;">📖 Medical Textbook Grounded (RAG)</span>'
+            elif msg_source == "groq":
+                source_badge = '<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#f0fdf4; color:#15803d; padding:3px 10px; border-radius:12px; border:1px solid #bbf7d0; font-weight:600; margin-left:10px;">⚡ Groq AI Engine</span>'
+            elif msg_source == "offline":
+                source_badge = '<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#fefce8; color:#a16207; padding:3px 10px; border-radius:12px; border:1px solid #fef08a; font-weight:600; margin-left:10px;">📋 Offline Clinical KB</span>'
+
             st.markdown(f"""
             <div class="chat-row bot-row">
                 <div class="bot-card">
-                    <div class="bot-header">
+                    <div class="bot-header" style="display:flex; align-items:center; flex-wrap:wrap;">
                         <div class="bot-avatar-box">🩺</div>
                         <span class="bot-title">UpCharika Clinical Assistant</span>
+                        {source_badge}
                     </div>
                     <div class="bot-body">{formatted_content}</div>
                 </div>
@@ -1102,10 +1167,12 @@ def chatbot_ui(username):
 
         with st.spinner("Evaluating clinical inquiry..."):
             try:
-                answer = get_ai_response(user_input, lang=lang)
+                answer, source = get_ai_response(user_input, lang=lang)
                 translated = translate_text(answer, lang)
             except Exception as e:
+                answer = str(e)
                 translated = f"⚠️ Clinical Service Notice: {str(e)}"
+                source = "notice"
 
             audio = None
             try:
@@ -1118,7 +1185,8 @@ def chatbot_ui(username):
                 "role": "bot",
                 "text": translated,
                 "raw_text": answer,
-                "audio": audio
+                "audio": audio,
+                "source": source
             })
         st.rerun()
 
