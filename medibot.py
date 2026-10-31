@@ -447,14 +447,14 @@ def call_groq_chat(client, messages, temperature=0.3):
             continue
     return None
 
-def get_ai_response(prompt, lang="English"):
+def get_ai_response(prompt, lang="English", force_offline=False):
     # 1. RAG Step: Retrieve verified medical textbook context from FAISS
     context = retrieve_medical_context(prompt, k=2)
     has_rag = bool(context and len(context.strip()) > 30)
     if has_rag:
         print(f"📖 [RAG FAISS] Retrieved medical context ({len(context)} characters) for: {prompt[:40]}")
 
-    active_client = get_groq_client()
+    active_client = None if force_offline else get_groq_client()
     if active_client:
         try:
             lang_instruction = ""
@@ -510,19 +510,28 @@ Always conclude by reminding the patient that this is triage support and to cons
                 temperature=0.3
             )
             if ans and len(ans.strip()) > 0:
-                source = "rag" if has_rag else "groq"
+                source = "rag_groq" if has_rag else "groq"
                 return ans, source
         except Exception:
             pass
 
-    # 2. Fallback to offline clinical knowledge base if prompt matches common symptoms
+    # 2. If Groq is NOT used or offline, but verified textbook context is available in FAISS:
+    if has_rag:
+        print("📚 [Pure Textbook Mode] Delivering direct textbook excerpts (Groq bypassed)")
+        direct_textbook_body = (
+            "Cause: Excerpt retrieved directly from Medical Textbook (FAISS Vector Database):\n"
+            f"{context.strip()}\n\n"
+            "Solution: Consult a certified medical practitioner for personalized clinical management based on these textbook findings.\n\n"
+            "Medicine: Do not self-prescribe medication. Prescription must be provided by a licensed physician.\n\n"
+            "When to see doctor: Recommended whenever persistent symptoms, jaundice, or acute discomfort occur.\n\n"
+            "Emergency: Immediate emergency admission required for severe pain, altered mental status, or breathing distress."
+        )
+        return direct_textbook_body, "textbook_direct"
+
+    # 3. Fallback to offline clinical knowledge base if prompt matches common symptoms
     offline_ans = match_offline_kb(prompt, lang=lang)
     if offline_ans:
         return offline_ans, "offline"
-
-    # 3. If offline but textbook context is available, format from textbook context directly
-    if has_rag:
-        return f"Cause: Based on clinical textbook findings:\n{context[:400]}...", "rag"
 
     # 4. If neither Groq nor offline KB answered, show a clear guidance notice in the chosen language
     if lang == "Marathi":
@@ -996,6 +1005,13 @@ def chatbot_ui(username):
         curr_idx = lang_list.index(st.session_state.selected_lang) if st.session_state.selected_lang in lang_list else 0
         lang = st.selectbox("Consultation Language", lang_list, index=curr_idx)
 
+        # Developer / Examiner Test Toggle
+        force_offline = st.checkbox(
+            "🧪 Test Mode: Disable Groq",
+            value=False,
+            help="Enable this to demonstrate that answers are fetched directly from your medical textbook without Groq AI."
+        )
+
         # Re-translate existing conversation dynamically if user switches language in sidebar
         if lang != st.session_state.selected_lang:
             st.session_state.selected_lang = lang
@@ -1092,7 +1108,7 @@ def chatbot_ui(username):
                     st.session_state.chat_history.append({"role": "user", "text": text})
                     with st.spinner("Evaluating clinical inquiry..."):
                         try:
-                            ans, source = get_ai_response(text, lang=lang)
+                            ans, source = get_ai_response(text, lang=lang, force_offline=force_offline)
                             trans = translate_text(ans, lang)
                         except Exception as e:
                             ans = str(e)
@@ -1131,8 +1147,10 @@ def chatbot_ui(username):
             formatted_content = format_medical_card(msg['text'])
             source_badge = ""
             msg_source = msg.get("source")
-            if msg_source == "rag":
-                source_badge = '<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#eff6ff; color:#1d4ed8; padding:3px 10px; border-radius:12px; border:1px solid #bfdbfe; font-weight:600; margin-left:10px;">📖 Medical Textbook Grounded (RAG)</span>'
+            if msg_source in ["rag", "rag_groq"]:
+                source_badge = '<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#eff6ff; color:#1d4ed8; padding:3px 10px; border-radius:12px; border:1px solid #bfdbfe; font-weight:600; margin-left:10px;">📖 Medical Textbook Grounded + Groq AI</span>'
+            elif msg_source == "textbook_direct":
+                source_badge = '<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#f5f3ff; color:#6d28d9; padding:3px 10px; border-radius:12px; border:1px solid #ddd6fe; font-weight:600; margin-left:10px;">📚 100% Direct Textbook (Groq OFF)</span>'
             elif msg_source == "groq":
                 source_badge = '<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#f0fdf4; color:#15803d; padding:3px 10px; border-radius:12px; border:1px solid #bbf7d0; font-weight:600; margin-left:10px;">⚡ Groq AI Engine</span>'
             elif msg_source == "offline":
@@ -1171,7 +1189,7 @@ def chatbot_ui(username):
 
         with st.spinner("Evaluating clinical inquiry..."):
             try:
-                answer, source = get_ai_response(user_input, lang=lang)
+                answer, source = get_ai_response(user_input, lang=lang, force_offline=force_offline)
                 translated = translate_text(answer, lang)
             except Exception as e:
                 answer = str(e)
