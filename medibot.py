@@ -1,3 +1,11 @@
+import sys
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 import streamlit as st
 
 # ✅ MUST BE FIRST STREAMLIT COMMAND
@@ -181,12 +189,13 @@ def format_medical_card(text):
         return ""
 
     if text.startswith("⚠️"):
-        return f"""
-        <div class="med-alert-box" style="background: #fffbeb; border: 1.5px solid #fef3c7; border-left: 4px solid #f59e0b; border-radius: 12px; padding: 14px 18px; margin: 6px 0;">
-            <div style="font-weight: 700; color: #b45309; margin-bottom: 6px; font-size: 14px;">Clinical Service Notice</div>
-            <div style="font-size: 13.5px; color: #78350f; line-height: 1.6;">{text.replace(chr(10), '<br>')}</div>
-        </div>
-        """
+        clean_alert_text = text.replace(chr(10), '<br>')
+        return (
+            '<div class="med-alert-box" style="background:#fffbeb; border:1.5px solid #fef3c7; border-left:4px solid #f59e0b; border-radius:12px; padding:14px 18px; margin:6px 0;">'
+            '<div style="font-weight:700; color:#b45309; margin-bottom:6px; font-size:14px;">Clinical Service Notice</div>'
+            f'<div style="font-size:13.5px; color:#78350f; line-height:1.6;">{clean_alert_text}</div>'
+            '</div>'
+        )
 
     sections = []
     current_title = None
@@ -246,14 +255,14 @@ def format_medical_card(text):
             else:
                 color = "#38bdf8"
 
-            html += f"""
-            <div class="med-section-card" style="border-left: 3.5px solid {color};">
-                <div class="med-section-badge" style="color: {color};">{title}</div>
-                <div class="med-section-text">{body}</div>
-            </div>
-            """
+            html += (
+                f'<div class="med-section-card" style="border-left: 3.5px solid {color}; margin: 8px 0; padding: 10px 14px; background: #ffffff; border-radius: 8px; border: 1px solid #f1f5f9; border-left-width: 4px;">'
+                f'<div class="med-section-badge" style="color: {color}; font-weight: 700; font-size: 13px; margin-bottom: 4px;">{title}</div>'
+                f'<div class="med-section-text" style="color: #334155; font-size: 14px; line-height: 1.6;">{body}</div>'
+                '</div>'
+            )
         else:
-            html += f"<div class='med-section-intro'>{body}</div>"
+            html += f'<div class="med-section-intro" style="color: #334155; font-size: 14px; line-height: 1.6; margin: 6px 0;">{body}</div>'
 
     return html
 
@@ -440,7 +449,7 @@ def call_groq_chat(client, messages, temperature=0.3):
             if res and res.choices and len(res.choices) > 0:
                 content = res.choices[0].message.content
                 if content and len(content.strip()) > 0:
-                    print(f"⚡ [Groq API Call SUCCESS] Model used: {m}")
+                    print(f"[Groq API] Model used: {m}")
                     return content.strip()
         except Exception as e:
             print(f"Groq model {m} attempt failed: {e}")
@@ -452,7 +461,7 @@ def get_ai_response(prompt, lang="English", force_offline=False):
     context = retrieve_medical_context(prompt, k=2)
     has_rag = bool(context and len(context.strip()) > 30)
     if has_rag:
-        print(f"📖 [RAG FAISS] Retrieved medical context ({len(context)} characters) for: {prompt[:40]}")
+        print(f"[RAG FAISS] Retrieved medical context ({len(context)} chars) for: {prompt[:40]}")
 
     active_client = None if force_offline else get_groq_client()
     if active_client:
@@ -517,15 +526,37 @@ Always conclude by reminding the patient that this is triage support and to cons
 
     # 2. If Groq is NOT used or offline, but verified textbook context is available in FAISS:
     if has_rag:
-        print("📚 [Pure Textbook Mode] Delivering direct textbook excerpts (Groq bypassed)")
-        direct_textbook_body = (
-            "Cause: Excerpt retrieved directly from Medical Textbook (FAISS Vector Database):\n"
-            f"{context.strip()}\n\n"
-            "Solution: Consult a certified medical practitioner for personalized clinical management based on these textbook findings.\n\n"
-            "Medicine: Do not self-prescribe medication. Prescription must be provided by a licensed physician.\n\n"
-            "When to see doctor: Recommended whenever persistent symptoms, jaundice, or acute discomfort occur.\n\n"
-            "Emergency: Immediate emergency admission required for severe pain, altered mental status, or breathing distress."
-        )
+        print("[Textbook Mode] Delivering direct textbook excerpts (Groq bypassed)")
+        import re
+        clean_context = re.sub(r'-\s*\n\s*', '', context.strip())
+        clean_context = re.sub(r'\s+', ' ', clean_context)
+        if len(clean_context) > 420:
+            clean_context = clean_context[:420].rsplit(' ', 1)[0] + "..."
+
+        if lang == "Marathi":
+            direct_textbook_body = (
+                f"कारण: वैद्यकीय संदर्भ ग्रंथातील थेट पुरावा (FAISS Vector Store):\n{clean_context}\n\n"
+                "उपाय: आहारावर विशेष लक्ष द्या. हलका व सहज पचणारा आहार (उकडलेल्या भाज्या, मुबलक पाणी, ताजे फळांचे रस) घ्या. तळलेले आणि मसालेदार पदार्थ टाळा.\n\n"
+                "औषध: स्वतःहून औषधे घेऊ नका. डॉक्टरांच्या सल्ल्यानुसार लिव्हर टॉनिक किंवा आवश्यक औषधोपचार घ्या.\n\n"
+                "डॉक्टरांना कधी भेटावे: त्वचा किंवा डोळे पिवळे दिसल्यास, तीव्र थकवा किंवा लघवीचा रंग गडद झाल्यास त्वरित डॉक्टरांचा सल्ला घ्या.\n\n"
+                "तातडीची मदत: तीव्र पोटदुखी, उच्च ताप किंवा चक्कर येत असल्यास त्वरित नजीकच्या रुग्णालयात (१०८ वर संपर्क) जा."
+            )
+        elif lang == "Hindi":
+            direct_textbook_body = (
+                f"कारण: मेडिकल संदर्भ पुस्तक से सीधा उद्धरण (FAISS Vector Store):\n{clean_context}\n\n"
+                "उपाय: हल्का, सुपाच्य भोजन और तरल पदार्थ (उबली सब्जियां, नारियल पानी, ताजा रस) लें। तैलीय और मसालेदार भोजन से पूरी तरह परहेज करें।\n\n"
+                "दवा: बिना डॉक्टर की सलाह के कोई दवा न लें। डॉक्टर द्वारा निर्धारित लिवर प्रोटेक्टिव दवाएं ही लें।\n\n"
+                "डॉक्टर से कब मिलें: आंखों या त्वचा में पीलापन, लगातार कमजोरी या पेशाब का रंग गहरा होने पर तुरंत चिकित्सक से संपर्क करें।\n\n"
+                "आपातकालीन: तेज पेट दर्द, अत्यधिक बुखार या बेहोशी की स्थिति में तुरंत आपातकालीन चिकित्सा (108 पर कॉल) प्राप्त करें।"
+            )
+        else:
+            direct_textbook_body = (
+                f"Cause: Direct excerpt from Medical Reference Textbook (FAISS Vector Store):\n{clean_context}\n\n"
+                "Solution: Adhere strictly to a light, easily digestible diet (boiled vegetables, lean hydration, fresh fruit juices). Avoid fried, oily, or processed foods.\n\n"
+                "Medicine: Do not self-medicate. Prescription medications and liver supportive care must be directed by a licensed physician.\n\n"
+                "When to see doctor: Consult a physician if skin/eyes appear yellowish, urine is dark, or persistent fatigue occurs.\n\n"
+                "Emergency: Immediate emergency evaluation is required if experiencing high fever with chills, acute abdominal pain, or disorientation."
+            )
         return direct_textbook_body, "textbook_direct"
 
     # 3. Fallback to offline clinical knowledge base if prompt matches common symptoms
@@ -1135,14 +1166,15 @@ def chatbot_ui(username):
     st.markdown("<div class='chat-feed'>", unsafe_allow_html=True)
     for msg in st.session_state.chat_history:
         if msg["role"] == "user":
-            st.markdown(f"""
-            <div class="chat-row user-row">
-                <div class="user-bubble">
-                    <div class="bubble-header">You</div>
-                    <div class="bubble-body">{msg['text']}</div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+            user_card_html = (
+                '<div class="chat-row user-row">'
+                '<div class="user-bubble">'
+                '<div class="bubble-header">You</div>'
+                f'<div class="bubble-body">{msg["text"]}</div>'
+                '</div>'
+                '</div>'
+            )
+            st.markdown(user_card_html, unsafe_allow_html=True)
         else:
             formatted_content = format_medical_card(msg['text'])
             source_badge = ""
@@ -1156,18 +1188,19 @@ def chatbot_ui(username):
             elif msg_source == "offline":
                 source_badge = '<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#fefce8; color:#a16207; padding:3px 10px; border-radius:12px; border:1px solid #fef08a; font-weight:600; margin-left:10px;">📋 Offline Clinical KB</span>'
 
-            st.markdown(f"""
-            <div class="chat-row bot-row">
-                <div class="bot-card">
-                    <div class="bot-header" style="display:flex; align-items:center; flex-wrap:wrap;">
-                        <div class="bot-avatar-box">🩺</div>
-                        <span class="bot-title">UpCharika Clinical Assistant</span>
-                        {source_badge}
-                    </div>
-                    <div class="bot-body">{formatted_content}</div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+            bot_card_html = (
+                '<div class="chat-row bot-row">'
+                '<div class="bot-card">'
+                '<div class="bot-header" style="display:flex; align-items:center; flex-wrap:wrap;">'
+                '<div class="bot-avatar-box">🩺</div>'
+                '<span class="bot-title">UpCharika Clinical Assistant</span>'
+                f'{source_badge}'
+                '</div>'
+                f'<div class="bot-body">{formatted_content}</div>'
+                '</div>'
+                '</div>'
+            )
+            st.markdown(bot_card_html, unsafe_allow_html=True)
             if msg.get("audio"):
                 st.markdown("<div class='audio-row'>", unsafe_allow_html=True)
                 st.caption("Audio Consultation:")
