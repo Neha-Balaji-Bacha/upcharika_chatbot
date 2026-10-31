@@ -566,15 +566,32 @@ Return ONLY the translated text."""
     return text
 
 # ================= VOICE =================
+def extract_voice_summary(text):
+    if not text:
+        return ""
+    clean = clean_text_for_voice(text)
+    sentences = [s.strip() for s in clean.split(".") if len(s.strip()) > 5]
+    if sentences:
+        summary = ". ".join(sentences[:2])
+        if not summary.endswith("."):
+            summary += "."
+        if len(summary) > 260:
+            summary = summary[:257] + "..."
+        return summary
+    return clean[:260]
+
 def generate_voice(text, lang):
     try:
+        if not text:
+            return None
+        speech_text = extract_voice_summary(text)
         lang_map = {"English": "en", "Hindi": "hi", "Marathi": "mr"}
-        tts = gTTS(text=text, lang=lang_map.get(lang, "en"))
+        tts = gTTS(text=speech_text, lang=lang_map.get(lang, "en"))
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
             tts.save(fp.name)
             return fp.name
-    except:
+    except Exception:
         return None
 
 # ================= AUTH UI =================
