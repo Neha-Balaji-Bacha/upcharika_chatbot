@@ -1,4 +1,5 @@
 medbot_env/
+venv/
 models/
 vectorstore/
 data/
@@ -6,6 +7,7 @@ data/
 *.zip
 *.gguf
 .env
+.streamlit/secrets.toml
 __pycache__/
 *.pyc
 .history/

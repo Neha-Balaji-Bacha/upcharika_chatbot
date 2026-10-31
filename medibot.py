@@ -394,6 +394,24 @@ def match_offline_kb(prompt, lang="English"):
     return None
 
 # ================= AI =================
+AVAILABLE_GROQ_MODELS = ["qwen/qwen3.8-27b", "openai/gpt-oss-20b", "llama-3.1-8b-instant"]
+
+def call_groq_chat(client, messages, temperature=0.3):
+    for m in AVAILABLE_GROQ_MODELS:
+        try:
+            res = client.chat.completions.create(
+                model=m,
+                messages=messages,
+                temperature=temperature
+            )
+            if res and res.choices and len(res.choices) > 0:
+                content = res.choices[0].message.content
+                if content and len(content.strip()) > 0:
+                    return content.strip()
+        except Exception:
+            continue
+    return None
+
 def get_ai_response(prompt, lang="English"):
     active_client = get_groq_client()
     if active_client:
@@ -423,9 +441,9 @@ Medicine:
 When to see doctor:
 Emergency:"""
 
-            response = active_client.chat.completions.create(
-                model="llama-3.1-8b-instant",
-                messages=[
+            ans = call_groq_chat(
+                active_client,
+                [
                     {
                         "role": "system",
                         "content": f"""You are UpCharika, a clinical AI healthcare assistant.
@@ -440,7 +458,6 @@ Always conclude by reminding the patient that this is triage support and to cons
                 ],
                 temperature=0.3
             )
-            ans = response.choices[0].message.content
             if ans and len(ans.strip()) > 0:
                 return ans
         except Exception:
@@ -514,9 +531,9 @@ def translate_text(text, lang):
     active_client = get_groq_client()
     if active_client:
         try:
-            resp = active_client.chat.completions.create(
-                model="llama-3.1-8b-instant",
-                messages=[
+            t_content = call_groq_chat(
+                active_client,
+                [
                     {
                         "role": "system",
                         "content": f"""You are a professional medical translator.
@@ -529,7 +546,6 @@ Return ONLY the translated text."""
                 ],
                 temperature=0.2
             )
-            t_content = resp.choices[0].message.content
             if t_content and len(t_content.strip()) > 0:
                 return t_content.strip()
         except Exception:
