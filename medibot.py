@@ -1077,9 +1077,20 @@ def chatbot_ui(username):
         if os.path.exists(pdf_guide_path):
             with open(pdf_guide_path, "rb") as f_pdf:
                 st.download_button(
-                    label="📄 Download Project Study Guide (PDF)",
+                    label="📄 Download Full Study Guide (PDF)",
                     data=f_pdf.read(),
                     file_name="UpCharika_Complete_Project_Study_Guide.pdf",
+                    mime="application/pdf",
+                    use_container_width=True
+                )
+
+        pdf_flow_path = "UpCharika_Complete_Project_Flow.pdf"
+        if os.path.exists(pdf_flow_path):
+            with open(pdf_flow_path, "rb") as f_flow:
+                st.download_button(
+                    label="📊 Download Project Flow Diagram (PDF)",
+                    data=f_flow.read(),
+                    file_name="UpCharika_Complete_Project_Flow.pdf",
                     mime="application/pdf",
                     use_container_width=True
                 )
