@@ -4,6 +4,7 @@ models/
 vectorstore/
 data/
 *.pdf
+!UpCharika_Complete_Project_Study_Guide.pdf
 *.zip
 *.gguf
 .env
