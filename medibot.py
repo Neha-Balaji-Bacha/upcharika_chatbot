@@ -1073,6 +1073,17 @@ def chatbot_ui(username):
                 cookies.save()
                 st.rerun()
 
+        pdf_guide_path = "UpCharika_Complete_Project_Study_Guide.pdf"
+        if os.path.exists(pdf_guide_path):
+            with open(pdf_guide_path, "rb") as f_pdf:
+                st.download_button(
+                    label="📄 Download Project Study Guide (PDF)",
+                    data=f_pdf.read(),
+                    file_name="UpCharika_Complete_Project_Study_Guide.pdf",
+                    mime="application/pdf",
+                    use_container_width=True
+                )
+
         st.markdown("---")
         st.markdown("""
         <div class="emergency-box">
