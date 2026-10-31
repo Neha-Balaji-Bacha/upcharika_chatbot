@@ -572,45 +572,26 @@ def auth_ui():
         [data-testid="stSidebar"], [data-testid="collapsedControl"] {
             display: none !important;
         }
-        [data-testid="stAppViewContainer"] > .main {
-            display: flex !important;
-            justify-content: center !important;
-            align-items: flex-start !important;
-        }
-        .block-container {
-            max-width: 460px !important;
-            width: 100% !important;
-            margin: 0 auto !important;
-            padding-top: 3.5rem !important;
-            padding-bottom: 2.5rem !important;
-            padding-left: 1.25rem !important;
-            padding-right: 1.25rem !important;
-        }
 
         /* Fluid background matching Mockup 1 */
         [data-testid="stAppViewContainer"] {
             background: radial-gradient(100% 100% at 50% 0%, #eff6ff 0%, #f8fafc 50%, #ede9fe 100%) !important;
         }
 
-        /* Card Container - robust professional 460px width */
-        div[data-testid="stVerticalBlockBorderWrapper"]:not(div[data-testid="stHorizontalBlock"] *),
-        div[data-testid="stContainer"]:has(.auth-header-block),
-        div[data-testid="stVerticalBlock"]:has(.auth-header-block) > div:has(.auth-header-block),
-        div:has(> div .auth-header-block) {
+        /* Single, non-cascading executive Auth Card */
+        .block-container {
+            max-width: 450px !important;
+            width: 90% !important;
+            margin: 40px auto !important;
             background: #ffffff !important;
             border: 1.5px solid #e2e8f0 !important;
             border-radius: 28px !important;
-            box-shadow: 0 20px 50px -15px rgba(99, 102, 241, 0.16), 0 0 1px 1px rgba(226, 232, 240, 0.8) !important;
+            box-shadow: 0 25px 60px -15px rgba(99, 102, 241, 0.16), 0 0 1px 1px rgba(226, 232, 240, 0.8) !important;
             padding: 38px 32px 30px 32px !important;
-            max-width: 460px !important;
-            width: 100% !important;
-            margin: 0 auto !important;
-            overflow: hidden !important;
         }
 
         div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"],
-        div[data-testid="stHorizontalBlock"] div[data-testid="column"],
-        div[data-testid="stHorizontalBlock"] div[data-testid="stVerticalBlockBorderWrapper"] {
+        div[data-testid="stHorizontalBlock"] div[data-testid="column"] {
             background: transparent !important;
             border: none !important;
             box-shadow: none !important;
@@ -795,7 +776,7 @@ def auth_ui():
     </style>
     """, unsafe_allow_html=True)
 
-    with st.container(border=True):
+    with st.container():
         st.markdown("""
         <div class="auth-header-block">
             <div class="brand-glow-circle">🩺</div>
@@ -880,6 +861,12 @@ def chatbot_ui(username):
     <style>
         .block-container {
             max-width: 100% !important;
+            width: 100% !important;
+            margin: 0 !important;
+            background: transparent !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
             padding-top: 1.5rem !important;
             padding-bottom: 2rem !important;
             padding-left: 2rem !important;
