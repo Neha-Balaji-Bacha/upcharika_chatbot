@@ -440,8 +440,10 @@ def call_groq_chat(client, messages, temperature=0.3):
             if res and res.choices and len(res.choices) > 0:
                 content = res.choices[0].message.content
                 if content and len(content.strip()) > 0:
+                    print(f"⚡ [Groq API Call SUCCESS] Model used: {m}")
                     return content.strip()
-        except Exception:
+        except Exception as e:
+            print(f"Groq model {m} attempt failed: {e}")
             continue
     return None
 
@@ -449,6 +451,8 @@ def get_ai_response(prompt, lang="English"):
     # 1. RAG Step: Retrieve verified medical textbook context from FAISS
     context = retrieve_medical_context(prompt, k=2)
     has_rag = bool(context and len(context.strip()) > 30)
+    if has_rag:
+        print(f"📖 [RAG FAISS] Retrieved medical context ({len(context)} characters) for: {prompt[:40]}")
 
     active_client = get_groq_client()
     if active_client:
