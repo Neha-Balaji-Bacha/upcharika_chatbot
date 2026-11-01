@@ -452,6 +452,29 @@ def get_ai_response(prompt, lang="English", force_offline=False):
         else:
             return "Notice: Please configure GROQ_API_KEY to consult the AI engine.", "notice"
 
+    # LANGUAGE DIRECTIVE FOR GROQ
+    lang_directive = ""
+    if lang == "Marathi":
+        lang_directive = (
+            "\n\nCRITICAL LANGUAGE INSTRUCTION: You MUST write your entire clinical response strictly in MARATHI (मराठी) using natural Devanagari script. "
+            "Use standard Marathi clinical headers exactly as:\n"
+            "कारण:\n"
+            "उपाय:\n"
+            "औषधे:\n"
+            "डॉक्टरांचा सल्ला:\n"
+            "आणीबाणी:"
+        )
+    elif lang == "Hindi":
+        lang_directive = (
+            "\n\nCRITICAL LANGUAGE INSTRUCTION: You MUST write your entire clinical response strictly in HINDI (हिंदी) using natural Devanagari script. "
+            "Use standard Hindi clinical headers exactly as:\n"
+            "कारण:\n"
+            "समाधान:\n"
+            "दवाइयां:\n"
+            "डॉक्टर से परामर्श:\n"
+            "आपातकालीन स्थिति:"
+        )
+
     # CASE 2: TEXTBOOK + GROQ TOGETHER (both textbook and Groq available)
     if has_rag:
         system_prompt = f"""You are UpCharika, a clinical AI healthcare assistant.
@@ -471,7 +494,7 @@ CRITICAL INSTRUCTION:
 In the Cause section, explicitly explain the clinical cause grounded in the verified medical textbook findings above.
 In Solution, Medicine, When to see doctor, and Emergency, provide evidence-based clinical guidance.
 Do NOT use asterisks, markdown symbols (*, **, ==) or bold formatting.
-Always conclude by reminding the patient to consult a licensed physician for definitive medical decisions."""
+Always conclude by reminding the patient to consult a licensed physician for definitive medical decisions.{lang_directive}"""
 
         ans = call_groq_chat(
             active_client,
@@ -496,7 +519,7 @@ Always conclude by reminding the patient to consult a licensed physician for def
 
     # CASE 3: NOT AVAILABLE IN TEXTBOOK -> GROQ GIVES THE ANSWER
     else:
-        system_prompt = """You are UpCharika, a clinical AI healthcare assistant.
+        system_prompt = f"""You are UpCharika, a clinical AI healthcare assistant.
 Provide structured medical triage guidance strictly following these 5 headers:
 Cause:
 Solution:
@@ -505,7 +528,7 @@ When to see doctor:
 Emergency:
 
 Do NOT use asterisks, markdown symbols (*, **, ==) or bold formatting.
-Always conclude by reminding the patient to consult a licensed physician for definitive medical decisions."""
+Always conclude by reminding the patient to consult a licensed physician for definitive medical decisions.{lang_directive}"""
 
         ans = call_groq_chat(
             active_client,
@@ -521,6 +544,31 @@ Always conclude by reminding the patient to consult a licensed physician for def
         return "Notice: UpCharika could not generate an answer at this time. Please try again.", "notice"
 
 # ================= TRANSLATION =================
+def translate_chunk_robust(text, target_code):
+    if not text or not text.strip():
+        return text
+
+    # Strategy 1: GoogleTranslator
+    try:
+        from deep_translator import GoogleTranslator
+        res = GoogleTranslator(source="auto", target=target_code).translate(text)
+        if res and res.strip():
+            return res
+    except Exception:
+        pass
+
+    # Strategy 2: MyMemoryTranslator (never blocked by Google Cloud IP limits)
+    try:
+        from deep_translator import MyMemoryTranslator
+        target_mymemory = "mr-IN" if target_code == "mr" else ("hi-IN" if target_code == "hi" else target_code)
+        res = MyMemoryTranslator(source="en-US", target=target_mymemory).translate(text)
+        if res and res.strip():
+            return res
+    except Exception:
+        pass
+
+    return text
+
 def translate_text(text, lang, force_offline=False):
     if not text or lang == "English":
         return text
@@ -529,23 +577,60 @@ def translate_text(text, lang, force_offline=False):
     if target_code == "en":
         return text
 
-    try:
-        from deep_translator import GoogleTranslator
-        return GoogleTranslator(source="auto", target=target_code).translate(text)
-    except Exception as e:
-        print(f"GoogleTranslator error: {e}")
+    # If already mostly Devanagari (e.g. Groq answered directly in Marathi/Hindi), skip re-translation
+    devanagari_chars = sum(1 for c in text if '\u0900' <= c <= '\u097f')
+    if devanagari_chars > len(text) * 0.25:
         return text
+
+    # Replace headers for clean display in target language
+    header_replacements_mr = {
+        "Cause:": "कारण:",
+        "Solution:": "उपाय:",
+        "Medicine:": "औषधे:",
+        "When to see doctor:": "डॉक्टरांचा सल्ला:",
+        "Emergency:": "आणीबाणी:"
+    }
+    header_replacements_hi = {
+        "Cause:": "कारण:",
+        "Solution:": "समाधान:",
+        "Medicine:": "दवाइयां:",
+        "When to see doctor:": "डॉक्टर से परामर्श:",
+        "Emergency:": "आपातकालीन स्थिति:"
+    }
+    repl_map = header_replacements_mr if target_code == "mr" else header_replacements_hi
+
+    # Process section by section to avoid HTTP GET length limits
+    sections = text.split("\n\n")
+    translated_sections = []
+    for sec in sections:
+        sec_s = sec.strip()
+        if not sec_s:
+            translated_sections.append("")
+            continue
+
+        prefix = ""
+        body = sec_s
+        for eng_hdr, target_hdr in repl_map.items():
+            if sec_s.startswith(eng_hdr):
+                prefix = target_hdr + " "
+                body = sec_s[len(eng_hdr):].strip()
+                break
+
+        trans_body = translate_chunk_robust(body, target_code)
+        translated_sections.append(prefix + trans_body)
+
+    return "\n\n".join(translated_sections)
 
 # ================= VOICE =================
 def extract_voice_summary(text):
     if not text:
         return ""
     clean = clean_text_for_voice(text)
-    sentences = [s.strip() for s in clean.split(".") if len(s.strip()) > 5]
+    import re
+    # Split by English period, Devanagari danda, or newlines
+    sentences = [s.strip() for s in re.split(r'[\.।\n\r]+', clean) if len(s.strip()) > 5]
     if sentences:
-        summary = ". ".join(sentences[:2])
-        if not summary.endswith("."):
-            summary += "."
+        summary = "। ".join(sentences[:2]) if any('\u0900' <= c <= '\u097f' for c in clean) else ". ".join(sentences[:2])
         if len(summary) > 260:
             summary = summary[:257] + "..."
         return summary
@@ -557,12 +642,14 @@ def generate_voice(text, lang):
             return None
         speech_text = extract_voice_summary(text)
         lang_map = {"English": "en", "Hindi": "hi", "Marathi": "mr"}
-        tts = gTTS(text=speech_text, lang=lang_map.get(lang, "en"))
+        target_lang = lang_map.get(lang, "en")
+        tts = gTTS(text=speech_text, lang=target_lang)
 
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
             tts.save(fp.name)
             return fp.name
     except Exception:
+        return None
         return None
 
 # ================= AUTH UI =================
