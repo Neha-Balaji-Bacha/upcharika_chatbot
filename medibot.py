@@ -45,7 +45,26 @@ from langchain_community.vectorstores import FAISS
 # ================= GOOGLE DRIVE VECTORSTORE =================
 VECTOR_URL = "https://drive.google.com/uc?id=1UunmpU4iudJycj-OibngzcJf18nA6OmR"
 def load_vectorstore():
-    faiss_index = os.path.join(os.path.abspath("vectorstore"), "db_faiss", "index.faiss")
+    faiss_dir = os.path.join(os.path.abspath("vectorstore"), "db_faiss")
+    faiss_index = os.path.join(faiss_dir, "index.faiss")
+    part1 = os.path.join(faiss_dir, "index.faiss.001")
+    part2 = os.path.join(faiss_dir, "index.faiss.002")
+
+    # 1. Fast Assembly from Git Repository Parts (Instant, 0 Google Drive dependency)
+    if not os.path.exists(faiss_index) and os.path.exists(part1) and os.path.exists(part2):
+        try:
+            print("[VectorStore] Assembling index.faiss from repository parts...")
+            with open(faiss_index, "wb") as out_f:
+                with open(part1, "rb") as p1:
+                    out_f.write(p1.read())
+                with open(part2, "rb") as p2:
+                    out_f.write(p2.read())
+            print("[VectorStore] index.faiss assembled successfully in 0.3s!")
+            return
+        except Exception as e:
+            print(f"[VectorStore Assembly Error] {e}")
+
+    # 2. Fallback to Google Drive download if parts are missing
     if not os.path.exists(faiss_index):
         try:
             print("[VectorStore] Index not found, downloading from Google Drive...")

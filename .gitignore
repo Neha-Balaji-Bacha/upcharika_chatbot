@@ -1,7 +1,8 @@
 medbot_env/
 venv/
 models/
-vectorstore/
+vectorstore/db_faiss/index.faiss
+vectorstore/db_faiss.zip
 data/
 *.pdf
 !UpCharika_Complete_Project_Study_Guide.pdf
