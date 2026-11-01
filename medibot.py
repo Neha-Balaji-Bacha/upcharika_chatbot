@@ -151,7 +151,7 @@ def get_vectorstore_status():
         return {"loaded": False, "count": 0, "error": str(e)}
     return {"loaded": False, "count": 0, "error": "Database not initialized"}
 
-def retrieve_medical_context(query, k=2):
+def retrieve_medical_context(query, k=2, score_threshold=1.25):
     try:
         db = get_vectorstore()
     except Exception as e:
@@ -168,19 +168,21 @@ def retrieve_medical_context(query, k=2):
             except Exception:
                 search_query = query
 
-        docs = db.similarity_search(search_query, k=k)
-        if docs:
+        results = db.similarity_search_with_score(search_query, k=k)
+        if results:
             snippets = []
-            for d in docs:
-                txt = d.page_content.strip()
-                if txt:
-                    src = d.metadata.get("source", "")
-                    page = d.metadata.get("page", "")
-                    ref_tag = ""
-                    if src:
-                        clean_src = os.path.splitext(src)[0].replace("_", " ")
-                        ref_tag = f"[{clean_src}" + (f", p.{page}" if page else "") + "]: "
-                    snippets.append(ref_tag + txt)
+            for doc, score in results:
+                # Accept only relevance distance <= 1.25 to distinguish genuine medical topics from unrelated questions
+                if score <= score_threshold:
+                    txt = doc.page_content.strip()
+                    if txt:
+                        src = doc.metadata.get("source", "")
+                        page = doc.metadata.get("page", "")
+                        ref_tag = ""
+                        if src:
+                            clean_src = os.path.splitext(src)[0].replace("_", " ")
+                            ref_tag = f"[{clean_src}" + (f", p.{page}" if page else "") + "]: "
+                        snippets.append(ref_tag + txt)
             return "\n\n".join(snippets)
     except Exception as e:
         print(f"Retrieval error: {e}")
