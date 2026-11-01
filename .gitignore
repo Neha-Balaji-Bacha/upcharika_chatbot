@@ -5,7 +5,6 @@ vectorstore/
 data/
 *.pdf
 !UpCharika_Complete_Project_Study_Guide.pdf
-!UpCharika_Complete_Project_Flow.pdf
 *.zip
 *.gguf
 .env
