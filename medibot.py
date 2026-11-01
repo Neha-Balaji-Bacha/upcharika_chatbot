@@ -285,9 +285,38 @@ def login_user(username, password):
 
 # ================= CLEAN TEXT =================
 def clean_text_for_voice(text):
-    for ch in ["*", "#", "=", "-", "•"]:
-        text = text.replace(ch, "")
-    return text
+    if not text:
+        return ""
+    import re
+    # 1. Remove citations in square brackets like [standard-treatment-guidelines, p.27]
+    t = re.sub(r'\[.*?\]', '', text)
+    # 2. Remove technical vectorstore boilerplate
+    t = re.sub(r'\(FAISS Vector Store\)', '', t, flags=re.IGNORECASE)
+    t = re.sub(r'Direct excerpt from Medical Reference Textbooks:?', '', t, flags=re.IGNORECASE)
+    t = re.sub(r'वैद्यकीय संदर्भ ग्रंथांमधील थेट उतारा:?', '', t)
+    t = re.sub(r'चिकित्सीय संदर्भ पुस्तकों से सीधा उद्धरण:?', '', t)
+    # 3. Expand abbreviations that cause "full stop" to be spoken
+    t = re.sub(r'\bTab\.\s*', 'Tablet ', t, flags=re.IGNORECASE)
+    t = re.sub(r'\bCap\.\s*', 'Capsule ', t, flags=re.IGNORECASE)
+    t = re.sub(r'\bSyr\.\s*', 'Syrup ', t, flags=re.IGNORECASE)
+    t = re.sub(r'\bInj\.\s*', 'Injection ', t, flags=re.IGNORECASE)
+    t = re.sub(r'\be\.g\.\s*', 'for example ', t, flags=re.IGNORECASE)
+    t = re.sub(r'\bi\.e\.\s*', 'that is ', t, flags=re.IGNORECASE)
+    t = re.sub(r'\b[pP]\.\s*\d+', '', t)
+    t = re.sub(r'टॅब\.\s*', 'टॅब्लेट ', t)
+    t = re.sub(r'टैब\.\s*', 'टैबलेट ', t)
+    # 4. Remove ellipsis / multiple dots that cause gTTS to say "full stop full stop"
+    t = re.sub(r'\.{2,}', ' ', t)
+    # 5. Remove markdown symbols
+    for ch in ["*", "#", "=", "-", "•", "🗹", "~", "_", "`", "<", ">", "(", ")", "[", "]"]:
+        t = t.replace(ch, " ")
+    # 6. Clean up multiple colons or weird punctuation
+    t = re.sub(r'^(Cause|Solution|Medicine|When to see doctor|Emergency|कारण|उपाय|औषधे|डॉक्टरांचा सल्ला|आणीबाणी)\s*[:\s]+', '', t, flags=re.IGNORECASE)
+    t = re.sub(r':+', ':', t)
+    t = re.sub(r'\s+:', ':', t)
+    t = re.sub(r':\s*:', ' ', t)
+    t = re.sub(r'[ \t]+', ' ', t)
+    return t.strip()
 
 # ================= FORMAT MEDICAL CARD =================
 def format_medical_card(text):
@@ -630,11 +659,18 @@ def extract_voice_summary(text):
     # Split by English period, Devanagari danda, or newlines
     sentences = [s.strip() for s in re.split(r'[\.।\n\r]+', clean) if len(s.strip()) > 5]
     if sentences:
-        summary = "। ".join(sentences[:2]) if any('\u0900' <= c <= '\u097f' for c in clean) else ". ".join(sentences[:2])
-        if len(summary) > 260:
-            summary = summary[:257] + "..."
+        is_devanagari = any('\u0900' <= c <= '\u097f' for c in clean)
+        punct = "। " if is_devanagari else ". "
+        summary = punct.join(sentences[:2])
+        if not summary.endswith((".", "।", "!")):
+            summary += punct.strip()
+        # Truncate to natural word boundary without adding '...' (which causes gTTS to say 'full stop')
+        if len(summary) > 250:
+            summary = summary[:245].rsplit(' ', 1)[0]
+            if not summary.endswith((".", "।")):
+                summary += ("।" if is_devanagari else ".")
         return summary
-    return clean[:260]
+    return clean[:250]
 
 def generate_voice(text, lang):
     try:
