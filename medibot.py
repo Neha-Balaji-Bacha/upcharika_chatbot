@@ -43,7 +43,20 @@ except Exception:
 from langchain_community.vectorstores import FAISS
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-FAISS_DIR = os.path.join(BASE_DIR, "vectorstore", "db_faiss")
+
+def find_faiss_dir():
+    candidates = [
+        os.path.join(BASE_DIR, "vectorstore", "db_faiss"),
+        os.path.join(os.getcwd(), "vectorstore", "db_faiss"),
+        os.path.abspath("vectorstore/db_faiss"),
+        "/mount/src/upcharika_chatbot/vectorstore/db_faiss"
+    ]
+    for c in candidates:
+        if os.path.exists(c) and os.path.isdir(c):
+            return c
+    return os.path.join(BASE_DIR, "vectorstore", "db_faiss")
+
+FAISS_DIR = find_faiss_dir()
 FAISS_INDEX = os.path.join(FAISS_DIR, "index.faiss")
 PART1 = os.path.join(FAISS_DIR, "index.faiss.001")
 PART2 = os.path.join(FAISS_DIR, "index.faiss.002")
@@ -54,36 +67,35 @@ EXPECTED_FAISS_SIZE = 119248941
 # ================= GOOGLE DRIVE VECTORSTORE =================
 VECTOR_URL = "https://drive.google.com/uc?id=1UunmpU4iudJycj-OibngzcJf18nA6OmR"
 def load_vectorstore():
+    target_dir = find_faiss_dir()
+    os.makedirs(target_dir, exist_ok=True)
+    idx_path = os.path.join(target_dir, "index.faiss")
+    p1 = os.path.join(target_dir, "index.faiss.001")
+    p2 = os.path.join(target_dir, "index.faiss.002")
+    pkl_path = os.path.join(target_dir, "index.pkl")
+
     # 1. Fast Assembly from Git Repository Parts (Instant, 0 Google Drive dependency)
-    needs_assembly = (not os.path.exists(FAISS_INDEX)) or (os.path.getsize(FAISS_INDEX) != EXPECTED_FAISS_SIZE)
-    if needs_assembly and os.path.exists(PART1) and os.path.exists(PART2):
+    needs_assembly = (not os.path.exists(idx_path)) or (os.path.getsize(idx_path) != EXPECTED_FAISS_SIZE)
+    if needs_assembly and os.path.exists(p1) and os.path.exists(p2):
         try:
-            print("[VectorStore] Assembling index.faiss from repository parts...")
-            os.makedirs(FAISS_DIR, exist_ok=True)
-            tmp_index = FAISS_INDEX + ".tmp"
-            with open(tmp_index, "wb") as out_f:
-                with open(PART1, "rb") as p1:
-                    out_f.write(p1.read())
-                with open(PART2, "rb") as p2:
-                    out_f.write(p2.read())
-            if os.path.exists(FAISS_INDEX):
-                try:
-                    os.remove(FAISS_INDEX)
-                except Exception:
-                    pass
-            os.replace(tmp_index, FAISS_INDEX)
+            print(f"[VectorStore] Assembling {idx_path} from repository parts...")
+            with open(idx_path, "wb") as out_f:
+                with open(p1, "rb") as f1:
+                    out_f.write(f1.read())
+                with open(p2, "rb") as f2:
+                    out_f.write(f2.read())
             print("[VectorStore] index.faiss assembled successfully in 0.3s!")
             return True
         except Exception as e:
             print(f"[VectorStore Assembly Error] {e}")
 
     # 2. Fallback to Google Drive download if parts are missing
-    if not os.path.exists(FAISS_INDEX) or os.path.getsize(FAISS_INDEX) != EXPECTED_FAISS_SIZE:
+    if (not os.path.exists(idx_path) or os.path.getsize(idx_path) != EXPECTED_FAISS_SIZE) or not os.path.exists(pkl_path):
         try:
             print("[VectorStore] Index not found, downloading from Google Drive...")
-            vs_root = os.path.join(BASE_DIR, "vectorstore")
+            vs_root = os.path.dirname(target_dir)
             os.makedirs(vs_root, exist_ok=True)
-            zip_dest = os.path.join(BASE_DIR, "vs.zip")
+            zip_dest = os.path.join(vs_root, "vs.zip")
             gdown.download(VECTOR_URL, zip_dest, quiet=False, fuzzy=True)
             if os.path.exists(zip_dest):
                 with zipfile.ZipFile(zip_dest, 'r') as zip_ref:
@@ -96,11 +108,20 @@ def load_vectorstore():
             return False
     return True
 
-@st.cache_resource(show_spinner=False)
+@st.cache_resource(show_spinner="Connecting 77,636 Medical Vectors from 9 Textbooks...")
 def get_vectorstore():
     load_vectorstore()
-    if not os.path.exists(FAISS_INDEX) or not os.path.exists(INDEX_PKL):
-        err = f"Index file or pkl missing in {FAISS_DIR}"
+    target_dir = find_faiss_dir()
+    idx_path = os.path.join(target_dir, "index.faiss")
+    pkl_path = os.path.join(target_dir, "index.pkl")
+
+    if not os.path.exists(idx_path):
+        err = f"index.faiss missing in {target_dir}"
+        print(f"[FAISS Error] {err}")
+        raise RuntimeError(err)
+
+    if not os.path.exists(pkl_path):
+        err = f"index.pkl missing in {target_dir}"
         print(f"[FAISS Error] {err}")
         raise RuntimeError(err)
 
@@ -110,7 +131,7 @@ def get_vectorstore():
         model_name=model_name,
         model_kwargs={"device": "cpu"}
     )
-    db = FAISS.load_local(FAISS_DIR, embed, allow_dangerous_deserialization=True)
+    db = FAISS.load_local(target_dir, embed, allow_dangerous_deserialization=True)
     print(f"[FAISS Ready] Successfully loaded {db.index.ntotal} medical vectors from 9 textbooks.")
     return db
 
@@ -131,9 +152,10 @@ def get_vectorstore_status():
     return {"loaded": False, "count": 0, "error": "Database not initialized"}
 
 def retrieve_medical_context(query, k=2):
-    db = get_vectorstore_safe()
-    if not db:
-        print(f"[RAG Warning] Vectorstore db is None for query: {query}")
+    try:
+        db = get_vectorstore()
+    except Exception as e:
+        print(f"[RAG Warning] Vectorstore db is None for query: {query} ({e})")
         return ""
     try:
         # If query has non-ASCII characters (e.g. Hindi or Marathi Devanagari), translate search term to English for English FAISS index
@@ -401,6 +423,13 @@ def get_ai_response(prompt, lang="English", force_offline=False):
             )
             return textbook_card, "textbook_direct"
         else:
+            vs_stat = get_vectorstore_status()
+            if not vs_stat["loaded"]:
+                err_info = vs_stat.get('error') or 'loading vectors'
+                return (
+                    f"Notice: The medical reference textbook database is currently initializing ({err_info}). "
+                    "Please wait a few seconds and send your inquiry again, or click 'Initialize Textbooks Now' in the sidebar."
+                ), "notice"
             return (
                 "Notice: This symptom was not found in the offline medical reference textbooks. "
                 "Please uncheck 'Disable Groq' to allow the AI engine to answer."
@@ -896,12 +925,24 @@ def chatbot_ui(username):
                 unsafe_allow_html=True
             )
         else:
+            err_msg = vs_status.get("error") or "Initializing model & vectors..."
             st.markdown(
-                f'<div style="background:#fffbeb; border:1px solid #fef3c7; border-radius:8px; padding:6px 10px; margin:4px 0 10px 0; font-size:11.5px; color:#b45309; display:flex; align-items:center; gap:6px;">'
-                f'<span>⏳</span> <span><b>Textbook DB:</b> Initializing...</span>'
+                f'<div style="background:#fffbeb; border:1px solid #fef3c7; border-radius:8px; padding:6px 10px; margin:4px 0 6px 0; font-size:11.5px; color:#b45309;">'
+                f'<div style="display:flex; align-items:center; gap:6px; font-weight:600;"><span>⏳</span> <span>Textbook Knowledge Base</span></div>'
+                f'<div style="font-size:10.5px; margin-top:3px; word-break:break-all;">{err_msg}</div>'
                 f'</div>',
                 unsafe_allow_html=True
             )
+            if st.button("🔄 Connect Textbooks Now", use_container_width=True, help="Force assembly and connect the 9 medical textbooks"):
+                with st.spinner("Connecting 77,636 medical textbook vectors..."):
+                    try:
+                        st.cache_resource.clear()
+                        load_vectorstore()
+                        get_vectorstore()
+                        st.success("Textbooks Connected!")
+                        st.rerun()
+                    except Exception as ex:
+                        st.error(f"Error connecting: {ex}")
 
         # Re-translate existing conversation dynamically if user switches language in sidebar
         if lang != st.session_state.selected_lang:
