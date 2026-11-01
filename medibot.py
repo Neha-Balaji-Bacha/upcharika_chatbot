@@ -293,8 +293,8 @@ def clean_text_for_voice(text):
     # 2. Remove technical vectorstore boilerplate
     t = re.sub(r'\(FAISS Vector Store\)', '', t, flags=re.IGNORECASE)
     t = re.sub(r'Direct excerpt from Medical Reference Textbooks:?', '', t, flags=re.IGNORECASE)
-    t = re.sub(r'वैद्यकीय संदर्भ ग्रंथांमधील थेट उतारा:?', '', t)
-    t = re.sub(r'चिकित्सीय संदर्भ पुस्तकों से सीधा उद्धरण:?', '', t)
+    t = re.sub(r'वैद्यकीय संदर्भ (ग्रंथांमधील|पुस्तकांमधील|साहित्यामधील) थेट उतारा:?', '', t)
+    t = re.sub(r'चिकित्सा? संदर्भ (पुस्तकों|ग्रंथों) से सीधा (उद्धरण|अंश):?', '', t)
     # 3. Expand abbreviations that cause "full stop" to be spoken
     t = re.sub(r'\bTab\.\s*', 'Tablet ', t, flags=re.IGNORECASE)
     t = re.sub(r'\bCap\.\s*', 'Capsule ', t, flags=re.IGNORECASE)
@@ -436,17 +436,24 @@ def get_ai_response(prompt, lang="English", force_offline=False):
     clean_context = ""
     if has_rag:
         import re
-        clean_context = re.sub(r'-\s*\n\s*', '', context.strip())
+        # Remove private use characters (like \uf0b7, \u25a0, checkbox symbols from PDFs)
+        clean_context = re.sub(r'[\uf000-\uf8ff\U00010000-\U0010ffff]', ' ', context)
+        # Remove hyphenated linebreaks
+        clean_context = re.sub(r'-\s*\n\s*', '', clean_context)
+        # Remove bracket citations from inside the excerpt
+        clean_context = re.sub(r'\[.*?\]:?', '', clean_context)
+        # Normalize whitespace
         clean_context = re.sub(r'[ \t]+', ' ', clean_context)
-        if len(clean_context) > 750:
-            clean_context = clean_context[:750].rsplit(' ', 1)[0] + "..."
+        clean_context = re.sub(r'\n{2,}', '\n', clean_context).strip()
+        if len(clean_context) > 600:
+            clean_context = clean_context[:600].rsplit(' ', 1)[0] + "."
 
     # CASE 1: USER CLICKED "DISABLE GROQ" -> Answer MUST be given purely by Textbook
     if force_offline:
         if has_rag:
             print("[Textbook Mode] Delivering direct textbook excerpts (Groq disabled)")
             textbook_card = (
-                f"Cause: Direct excerpt from Medical Reference Textbooks (FAISS Vector Store):\n{clean_context}\n\n"
+                f"Cause: Direct excerpt from Medical Reference Textbooks:\n{clean_context}\n\n"
                 "Solution: Follow evidence-based supportive care as outlined in medical literature. Maintain adequate rest, monitor symptoms, and stay properly hydrated.\n\n"
                 "Medicine: Do not self-medicate with prescription drugs. Pharmaceutical treatments and dosages must be directed by a licensed physician.\n\n"
                 "When to see doctor: Consult a qualified physician if symptoms are severe, persist beyond 48-72 hours, or progressively worsen.\n\n"
@@ -471,7 +478,7 @@ def get_ai_response(prompt, lang="English", force_offline=False):
     if not active_client:
         if has_rag:
             textbook_card = (
-                f"Cause: Direct excerpt from Medical Reference Textbooks (FAISS Vector Store):\n{clean_context}\n\n"
+                f"Cause: Direct excerpt from Medical Reference Textbooks:\n{clean_context}\n\n"
                 "Solution: Follow evidence-based supportive care as outlined in medical literature. Maintain adequate rest, monitor symptoms, and stay properly hydrated.\n\n"
                 "Medicine: Do not self-medicate with prescription drugs. Pharmaceutical treatments and dosages must be directed by a licensed physician.\n\n"
                 "When to see doctor: Consult a qualified physician if symptoms are severe, persist beyond 48-72 hours, or progressively worsen.\n\n"
@@ -538,7 +545,7 @@ Always conclude by reminding the patient to consult a licensed physician for def
 
         # If Groq call failed or timed out, fallback directly to Textbook!
         textbook_card = (
-            f"Cause: Direct excerpt from Medical Reference Textbooks (FAISS Vector Store):\n{clean_context}\n\n"
+            f"Cause: Direct excerpt from Medical Reference Textbooks:\n{clean_context}\n\n"
             "Solution: Follow evidence-based supportive care as outlined in medical literature. Maintain adequate rest, monitor symptoms, and stay properly hydrated.\n\n"
             "Medicine: Do not self-medicate with prescription drugs. Pharmaceutical treatments and dosages must be directed by a licensed physician.\n\n"
             "When to see doctor: Consult a qualified physician if symptoms are severe, persist beyond 48-72 hours, or progressively worsen.\n\n"
@@ -645,7 +652,24 @@ def translate_text(text, lang, force_offline=False):
                 body = sec_s[len(eng_hdr):].strip()
                 break
 
-        trans_body = translate_chunk_robust(body, target_code)
+        # If body is long (like a textbook excerpt), split into manageable chunks (< 200 chars) for robust translation
+        if len(body) > 200:
+            raw_lines = [l.strip() for l in body.split("\n") if l.strip()]
+            sub_chunks = []
+            for line in raw_lines:
+                if len(line) > 200:
+                    sentences = [s.strip() for s in line.split(". ") if s.strip()]
+                    sub_chunks.extend(sentences)
+                else:
+                    sub_chunks.append(line)
+            trans_subs = []
+            for sub in sub_chunks:
+                if sub:
+                    trans_subs.append(translate_chunk_robust(sub, target_code))
+            trans_body = "\n".join(trans_subs)
+        else:
+            trans_body = translate_chunk_robust(body, target_code)
+
         translated_sections.append(prefix + trans_body)
 
     return "\n\n".join(translated_sections)
@@ -685,7 +709,6 @@ def generate_voice(text, lang):
             tts.save(fp.name)
             return fp.name
     except Exception:
-        return None
         return None
 
 # ================= AUTH UI =================
