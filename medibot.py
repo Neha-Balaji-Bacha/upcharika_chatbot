@@ -45,17 +45,23 @@ from langchain_community.vectorstores import FAISS
 # ================= GOOGLE DRIVE VECTORSTORE =================
 VECTOR_URL = "https://drive.google.com/uc?id=1UunmpU4iudJycj-OibngzcJf18nA6OmR"
 def load_vectorstore():
-    if not os.path.exists("vectorstore/db_faiss/index.faiss"):
-        with st.spinner("Preparing AI system... please wait"):
-            gdown.download(VECTOR_URL, "vs.zip", quiet=False)
-
-            with zipfile.ZipFile("vs.zip", 'r') as zip_ref:
-                zip_ref.extractall("vectorstore")
-
-            os.remove("vs.zip")
+    faiss_index = os.path.join(os.path.abspath("vectorstore"), "db_faiss", "index.faiss")
+    if not os.path.exists(faiss_index):
+        try:
+            print("[VectorStore] Index not found, downloading from Google Drive...")
+            os.makedirs("vectorstore", exist_ok=True)
+            gdown.download(VECTOR_URL, "vs.zip", quiet=False, fuzzy=True)
+            if os.path.exists("vs.zip"):
+                with zipfile.ZipFile("vs.zip", 'r') as zip_ref:
+                    zip_ref.extractall("vectorstore")
+                os.remove("vs.zip")
+                print("[VectorStore] Download & extraction complete!")
+        except Exception as e:
+            print(f"[VectorStore Error] Failed to download/extract: {e}")
 
 @st.cache_resource(show_spinner=False)
 def get_vectorstore():
+    load_vectorstore()
     try:
         faiss_path = os.path.abspath("vectorstore/db_faiss")
         index_file = os.path.join(faiss_path, "index.faiss")
@@ -296,10 +302,11 @@ def format_medical_card(text):
 
 # ================= AI =================
 AVAILABLE_GROQ_MODELS = [
+    "qwen/qwen3.8-27b",
+    "openai/gpt-oss-20b",
+    "openai/gpt-oss-120b",
     "llama-3.3-70b-versatile",
-    "llama-3.1-8b-instant",
-    "mixtral-8x7b-32768",
-    "gemma2-9b-it"
+    "llama-3.1-8b-instant"
 ]
 
 def call_groq_chat(client, messages, temperature=0.3):
