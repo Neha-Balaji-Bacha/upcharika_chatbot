@@ -42,67 +42,96 @@ except Exception:
     from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FAISS_DIR = os.path.join(BASE_DIR, "vectorstore", "db_faiss")
+FAISS_INDEX = os.path.join(FAISS_DIR, "index.faiss")
+PART1 = os.path.join(FAISS_DIR, "index.faiss.001")
+PART2 = os.path.join(FAISS_DIR, "index.faiss.002")
+INDEX_PKL = os.path.join(FAISS_DIR, "index.pkl")
+LOCAL_MODEL = os.path.join(BASE_DIR, "models", "all-MiniLM-L6-v2")
+EXPECTED_FAISS_SIZE = 119248941
+
 # ================= GOOGLE DRIVE VECTORSTORE =================
 VECTOR_URL = "https://drive.google.com/uc?id=1UunmpU4iudJycj-OibngzcJf18nA6OmR"
 def load_vectorstore():
-    faiss_dir = os.path.join(os.path.abspath("vectorstore"), "db_faiss")
-    faiss_index = os.path.join(faiss_dir, "index.faiss")
-    part1 = os.path.join(faiss_dir, "index.faiss.001")
-    part2 = os.path.join(faiss_dir, "index.faiss.002")
-
     # 1. Fast Assembly from Git Repository Parts (Instant, 0 Google Drive dependency)
-    if not os.path.exists(faiss_index) and os.path.exists(part1) and os.path.exists(part2):
+    needs_assembly = (not os.path.exists(FAISS_INDEX)) or (os.path.getsize(FAISS_INDEX) != EXPECTED_FAISS_SIZE)
+    if needs_assembly and os.path.exists(PART1) and os.path.exists(PART2):
         try:
             print("[VectorStore] Assembling index.faiss from repository parts...")
-            with open(faiss_index, "wb") as out_f:
-                with open(part1, "rb") as p1:
+            os.makedirs(FAISS_DIR, exist_ok=True)
+            tmp_index = FAISS_INDEX + ".tmp"
+            with open(tmp_index, "wb") as out_f:
+                with open(PART1, "rb") as p1:
                     out_f.write(p1.read())
-                with open(part2, "rb") as p2:
+                with open(PART2, "rb") as p2:
                     out_f.write(p2.read())
+            if os.path.exists(FAISS_INDEX):
+                try:
+                    os.remove(FAISS_INDEX)
+                except Exception:
+                    pass
+            os.replace(tmp_index, FAISS_INDEX)
             print("[VectorStore] index.faiss assembled successfully in 0.3s!")
-            return
+            return True
         except Exception as e:
             print(f"[VectorStore Assembly Error] {e}")
 
     # 2. Fallback to Google Drive download if parts are missing
-    if not os.path.exists(faiss_index):
+    if not os.path.exists(FAISS_INDEX) or os.path.getsize(FAISS_INDEX) != EXPECTED_FAISS_SIZE:
         try:
             print("[VectorStore] Index not found, downloading from Google Drive...")
-            os.makedirs("vectorstore", exist_ok=True)
-            gdown.download(VECTOR_URL, "vs.zip", quiet=False, fuzzy=True)
-            if os.path.exists("vs.zip"):
-                with zipfile.ZipFile("vs.zip", 'r') as zip_ref:
-                    zip_ref.extractall("vectorstore")
-                os.remove("vs.zip")
+            vs_root = os.path.join(BASE_DIR, "vectorstore")
+            os.makedirs(vs_root, exist_ok=True)
+            zip_dest = os.path.join(BASE_DIR, "vs.zip")
+            gdown.download(VECTOR_URL, zip_dest, quiet=False, fuzzy=True)
+            if os.path.exists(zip_dest):
+                with zipfile.ZipFile(zip_dest, 'r') as zip_ref:
+                    zip_ref.extractall(vs_root)
+                os.remove(zip_dest)
                 print("[VectorStore] Download & extraction complete!")
+                return True
         except Exception as e:
             print(f"[VectorStore Error] Failed to download/extract: {e}")
+            return False
+    return True
 
 @st.cache_resource(show_spinner=False)
 def get_vectorstore():
     load_vectorstore()
+    if not os.path.exists(FAISS_INDEX) or not os.path.exists(INDEX_PKL):
+        err = f"Index file or pkl missing in {FAISS_DIR}"
+        print(f"[FAISS Error] {err}")
+        raise RuntimeError(err)
+
+    model_name = LOCAL_MODEL if os.path.exists(LOCAL_MODEL) else "sentence-transformers/all-MiniLM-L6-v2"
+    print(f"[FAISS Loading] Initializing embeddings from: {model_name}")
+    embed = HuggingFaceEmbeddings(
+        model_name=model_name,
+        model_kwargs={"device": "cpu"}
+    )
+    db = FAISS.load_local(FAISS_DIR, embed, allow_dangerous_deserialization=True)
+    print(f"[FAISS Ready] Successfully loaded {db.index.ntotal} medical vectors from 9 textbooks.")
+    return db
+
+def get_vectorstore_safe():
     try:
-        faiss_path = os.path.abspath("vectorstore/db_faiss")
-        index_file = os.path.join(faiss_path, "index.faiss")
-        if os.path.exists(index_file):
-            local_model = os.path.abspath("models/all-MiniLM-L6-v2")
-            model_name = local_model if os.path.exists(local_model) else "sentence-transformers/all-MiniLM-L6-v2"
-            print(f"[FAISS Loading] Initializing embeddings from: {model_name}")
-            embed = HuggingFaceEmbeddings(
-                model_name=model_name,
-                model_kwargs={"device": "cpu"}
-            )
-            db = FAISS.load_local(faiss_path, embed, allow_dangerous_deserialization=True)
-            print(f"[FAISS Ready] Successfully loaded {db.index.ntotal} medical vectors from 9 textbooks.")
-            return db
-        else:
-            print(f"[FAISS Warning] Index file not found at: {index_file}")
+        return get_vectorstore()
     except Exception as e:
-        print(f"Error loading FAISS vectorstore: {e}")
-    return None
+        print(f"[FAISS Safe Catch] {e}")
+        return None
+
+def get_vectorstore_status():
+    try:
+        db = get_vectorstore()
+        if db and hasattr(db, "index"):
+            return {"loaded": True, "count": db.index.ntotal, "error": None}
+    except Exception as e:
+        return {"loaded": False, "count": 0, "error": str(e)}
+    return {"loaded": False, "count": 0, "error": "Database not initialized"}
 
 def retrieve_medical_context(query, k=2):
-    db = get_vectorstore()
+    db = get_vectorstore_safe()
     if not db:
         print(f"[RAG Warning] Vectorstore db is None for query: {query}")
         return ""
@@ -178,7 +207,7 @@ def get_groq_client():
 
 client = get_groq_client()
 
-USER_DB = "users.json"
+USER_DB = os.path.join(BASE_DIR, "users.json")
 
 # ================= USER DB =================
 def load_users():
@@ -858,6 +887,22 @@ def chatbot_ui(username):
             help="Enable this to demonstrate that answers are fetched directly from your medical textbook without Groq AI."
         )
 
+        vs_status = get_vectorstore_status()
+        if vs_status["loaded"]:
+            st.markdown(
+                f'<div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:6px 10px; margin:4px 0 10px 0; font-size:11.5px; color:#1e40af; display:flex; align-items:center; gap:6px;">'
+                f'<span>📚</span> <span><b>Medical Textbooks:</b> {vs_status["count"]:,} vectors ready</span>'
+                f'</div>',
+                unsafe_allow_html=True
+            )
+        else:
+            st.markdown(
+                f'<div style="background:#fffbeb; border:1px solid #fef3c7; border-radius:8px; padding:6px 10px; margin:4px 0 10px 0; font-size:11.5px; color:#b45309; display:flex; align-items:center; gap:6px;">'
+                f'<span>⏳</span> <span><b>Textbook DB:</b> Initializing...</span>'
+                f'</div>',
+                unsafe_allow_html=True
+            )
+
         # Re-translate existing conversation dynamically if user switches language in sidebar
         if lang != st.session_state.selected_lang:
             st.session_state.selected_lang = lang
@@ -888,7 +933,7 @@ def chatbot_ui(username):
                 cookies.save()
                 st.rerun()
 
-        pdf_guide_path = "UpCharika_Complete_Project_Study_Guide.pdf"
+        pdf_guide_path = os.path.join(BASE_DIR, "UpCharika_Complete_Project_Study_Guide.pdf")
         if os.path.exists(pdf_guide_path):
             with open(pdf_guide_path, "rb") as f_pdf:
                 st.download_button(
@@ -899,7 +944,7 @@ def chatbot_ui(username):
                     use_container_width=True
                 )
 
-        pdf_flow_path = "UpCharika_Complete_Project_Flow.pdf"
+        pdf_flow_path = os.path.join(BASE_DIR, "UpCharika_Complete_Project_Flow.pdf")
         if os.path.exists(pdf_flow_path):
             with open(pdf_flow_path, "rb") as f_flow:
                 st.download_button(
@@ -910,7 +955,7 @@ def chatbot_ui(username):
                     use_container_width=True
                 )
 
-        pdf_structure_path = "UpCharika_Project_Folder_Structure_Guide.pdf"
+        pdf_structure_path = os.path.join(BASE_DIR, "UpCharika_Project_Folder_Structure_Guide.pdf")
         if os.path.exists(pdf_structure_path):
             with open(pdf_structure_path, "rb") as f_struct:
                 st.download_button(
@@ -921,7 +966,7 @@ def chatbot_ui(username):
                     use_container_width=True
                 )
 
-        pdf_rag_path = "UpCharika_Master_VectorStore_and_RAG_Architecture_Guide.pdf"
+        pdf_rag_path = os.path.join(BASE_DIR, "UpCharika_Master_VectorStore_and_RAG_Architecture_Guide.pdf")
         if os.path.exists(pdf_rag_path):
             with open(pdf_rag_path, "rb") as f_rag:
                 st.download_button(
@@ -932,7 +977,7 @@ def chatbot_ui(username):
                     use_container_width=True
                 )
 
-        pdf_groq_path = "UpCharika_Groq_API_and_Medical_Textbook_Master_Guide.pdf"
+        pdf_groq_path = os.path.join(BASE_DIR, "UpCharika_Groq_API_and_Medical_Textbook_Master_Guide.pdf")
         if os.path.exists(pdf_groq_path):
             with open(pdf_groq_path, "rb") as f_groq:
                 st.download_button(
@@ -943,7 +988,7 @@ def chatbot_ui(username):
                     use_container_width=True
                 )
 
-        pdf_code_path = "UpCharika_Medibot_Code_Walkthrough_and_Viva_Guide.pdf"
+        pdf_code_path = os.path.join(BASE_DIR, "UpCharika_Medibot_Code_Walkthrough_and_Viva_Guide.pdf")
         if os.path.exists(pdf_code_path):
             with open(pdf_code_path, "rb") as f_code:
                 st.download_button(
@@ -1130,8 +1175,7 @@ def chatbot_ui(username):
 def main():
     # Preload Vectorstore into memory
     if "vs_loaded" not in st.session_state:
-        load_vectorstore()
-        get_vectorstore()
+        get_vectorstore_safe()
         st.session_state.vs_loaded = True
 
     # Auto Login from Cookies
