@@ -442,9 +442,10 @@ def get_ai_response(prompt, lang="English", force_offline=False):
         clean_context = re.sub(r'-\s*\n\s*', '', clean_context)
         # Remove bracket citations from inside the excerpt
         clean_context = re.sub(r'\[.*?\]:?', '', clean_context)
+        # Normalize internal linebreaks to spaces so sentences flow naturally
+        clean_context = re.sub(r'\s*\n\s*', ' ', clean_context)
         # Normalize whitespace
-        clean_context = re.sub(r'[ \t]+', ' ', clean_context)
-        clean_context = re.sub(r'\n{2,}', '\n', clean_context).strip()
+        clean_context = re.sub(r'[ \t]+', ' ', clean_context).strip()
         if len(clean_context) > 600:
             clean_context = clean_context[:600].rsplit(' ', 1)[0] + "."
 
@@ -671,23 +672,33 @@ def translate_text(text, lang, force_offline=False):
                 body = sec_s[len(eng_hdr):].strip()
                 break
 
-        # If body is long (like a textbook excerpt), split into manageable chunks (< 200 chars) for robust translation
-        if len(body) > 200:
-            raw_lines = [l.strip() for l in body.split("\n") if l.strip()]
-            sub_chunks = []
-            for line in raw_lines:
-                if len(line) > 200:
-                    sentences = [s.strip() for s in line.split(". ") if s.strip()]
-                    sub_chunks.extend(sentences)
+        # Clean and join broken line wraps from PDF excerpts
+        import re
+        body_clean = re.sub(r'Direct excerpt from Medical Reference Textbooks:?', '', body, flags=re.IGNORECASE).strip()
+        body_clean = re.sub(r'\s*\n\s*', ' ', body_clean).strip()
+
+        # If body is long (> 350 chars), split by sentences into chunks < 380 chars for MyMemory/Google limit
+        if len(body_clean) > 350:
+            sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+', body_clean) if s.strip()]
+            chunks = []
+            curr = ""
+            for s in sentences:
+                if len(curr) + len(s) + 1 < 380:
+                    curr = (curr + " " + s).strip()
                 else:
-                    sub_chunks.append(line)
+                    if curr:
+                        chunks.append(curr)
+                    curr = s
+            if curr:
+                chunks.append(curr)
+
             trans_subs = []
-            for sub in sub_chunks:
-                if sub:
-                    trans_subs.append(translate_chunk_robust(sub, target_code))
-            trans_body = "\n".join(trans_subs)
+            for chunk in chunks:
+                if chunk.strip():
+                    trans_subs.append(translate_chunk_robust(chunk.strip(), target_code))
+            trans_body = " ".join(trans_subs)
         else:
-            trans_body = translate_chunk_robust(body, target_code)
+            trans_body = translate_chunk_robust(body_clean, target_code)
 
         translated_sections.append(prefix + trans_body)
 
