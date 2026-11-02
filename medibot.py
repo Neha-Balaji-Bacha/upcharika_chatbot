@@ -594,11 +594,13 @@ def translate_chunk_robust(text, target_code):
     except Exception:
         pass
 
-    # Strategy 2: MyMemoryTranslator (never blocked by Google Cloud IP limits)
+    # Strategy 2: MyMemoryTranslator
     try:
         from deep_translator import MyMemoryTranslator
-        target_mymemory = "mr-IN" if target_code == "mr" else ("hi-IN" if target_code == "hi" else target_code)
-        res = MyMemoryTranslator(source="en-US", target=target_mymemory).translate(text)
+        target_mymemory = "mr-IN" if target_code == "mr" else ("hi-IN" if target_code == "hi" else "en-US")
+        dev_count = sum(1 for c in text if '\u0900' <= c <= '\u097f')
+        source_mymemory = "mr-IN" if (dev_count > len(text) * 0.3 and target_code == "hi") else ("hi-IN" if (dev_count > len(text) * 0.3 and target_code == "mr") else "en-US")
+        res = MyMemoryTranslator(source=source_mymemory, target=target_mymemory).translate(text)
         if res and res.strip():
             return res
     except Exception:
@@ -606,20 +608,31 @@ def translate_chunk_robust(text, target_code):
 
     return text
 
-def translate_text(text, lang, force_offline=False):
-    if not text or lang == "English":
+def translate_text(text, lang, force_offline=False, source_lang=None):
+    if not text:
         return text
 
     target_code = "mr" if lang.strip().lower() in ["marathi", "mr"] else ("hi" if lang.strip().lower() in ["hindi", "hi"] else "en")
+
+    # If source language matches target language, no translation needed
+    if source_lang and source_lang.strip().lower() == lang.strip().lower():
+        return text
+
+    # Verify if text is already in target language
     if target_code == "en":
-        return text
+        dev_count = sum(1 for c in text if '\u0900' <= c <= '\u097f')
+        if dev_count < len(text) * 0.15:
+            return text
+    elif target_code == "mr":
+        # Only skip if it genuinely has Marathi-specific headers
+        if any(h in text for h in ["औषधे:", "डॉक्टरांचा सल्ला:", "आणीबाणी:"]):
+            return text
+    elif target_code == "hi":
+        # Only skip if it genuinely has Hindi-specific headers
+        if any(h in text for h in ["दवाइयां:", "डॉक्टर से परामर्श:", "आपातकालीन स्थिति:"]):
+            return text
 
-    # If already mostly Devanagari (e.g. Groq answered directly in Marathi/Hindi), skip re-translation
-    devanagari_chars = sum(1 for c in text if '\u0900' <= c <= '\u097f')
-    if devanagari_chars > len(text) * 0.25:
-        return text
-
-    # Replace headers for clean display in target language
+    # Standard headers for each target language
     header_replacements_mr = {
         "Cause:": "कारण:",
         "Solution:": "उपाय:",
@@ -636,23 +649,22 @@ def translate_text(text, lang, force_offline=False):
     }
     repl_map = header_replacements_mr if target_code == "mr" else header_replacements_hi
 
-    # Strategy A: If Groq is active (not offline test mode), use AI translation for instant, flawless Devanagari translation
+    # Strategy A: If Groq is active (not offline test mode), use AI translation for instant, flawless translation
     if not force_offline:
         active_client = get_groq_client()
         if active_client:
             expected_headers = list(repl_map.values())
+            target_name = "MARATHI (मराठी Devanagari)" if target_code == "mr" else ("HINDI (हिंदी Devanagari)" if target_code == "hi" else "ENGLISH")
             trans_prompt = (
-                f"You are a professional medical translator. Translate the following clinical triage consultation accurately into natural {lang} using Devanagari script.\n"
+                f"You are a professional medical translator. Translate the following clinical triage consultation accurately into natural {target_name}.\n"
                 f"You MUST use these exact section headers:\n"
                 + "\n".join(expected_headers)
-                + "\nDo NOT use asterisks or markdown bolding (**, *). Translate both headers and body text completely into Devanagari script. Do not output English words.\n\n"
+                + "\nDo NOT use asterisks or markdown bolding (**, *). Translate both headers and body text completely into the target language. Do not output words from other languages.\n\n"
                 f"Clinical text to translate:\n{text}"
             )
             res = call_groq_chat(active_client, [{"role": "user", "content": trans_prompt}], temperature=0.2)
             if res and len(res.strip()) > 50:
-                dev_count = sum(1 for c in res if '\u0900' <= c <= '\u097f')
-                if dev_count > len(res) * 0.25:
-                    return res.strip()
+                return res.strip()
 
     # Strategy B: Offline or deep_translator fallback
     # Process section by section to avoid HTTP GET length limits
@@ -1122,13 +1134,15 @@ def chatbot_ui(username):
 
         # Re-translate existing conversation dynamically if user switches language in sidebar
         if lang != st.session_state.selected_lang:
+            prev_l = st.session_state.selected_lang
             st.session_state.selected_lang = lang
             with st.spinner(f"Translating consultation to {lang}..."):
                 for msg in st.session_state.chat_history:
                     if msg.get("role") == "bot":
                         raw_src = msg.get("raw_text", msg.get("text", ""))
-                        re_trans = translate_text(raw_src, lang, force_offline=force_offline)
+                        re_trans = translate_text(raw_src, lang, force_offline=force_offline, source_lang=msg.get("lang", prev_l))
                         msg["text"] = re_trans
+                        msg["lang"] = lang
                         try:
                             clean_t = clean_text_for_voice(re_trans)
                             msg["audio"] = generate_voice(clean_t, lang)
@@ -1302,7 +1316,8 @@ def chatbot_ui(username):
                             "text": trans,
                             "raw_text": ans,
                             "audio": audio,
-                            "source": source
+                            "source": source,
+                            "lang": lang
                         })
                     st.rerun()
 
@@ -1385,7 +1400,8 @@ def chatbot_ui(username):
                 "text": translated,
                 "raw_text": answer,
                 "audio": audio,
-                "source": source
+                "source": source,
+                "lang": lang
             })
         st.rerun()
 
