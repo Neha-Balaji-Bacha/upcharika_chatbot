@@ -1053,7 +1053,7 @@ def auth_ui():
             max-width: 440px !important;
             width: 92% !important;
             margin-top: 6px !important;
-            margin-bottom: 16px !important;
+            margin-bottom: 28px !important;
             margin-left: auto !important;
             margin-right: auto !important;
             background: #ffffff !important;
@@ -1061,7 +1061,7 @@ def auth_ui():
             border-radius: 22px !important;
             box-shadow: 0 16px 40px -10px rgba(99, 102, 241, 0.14), 0 0 1px 1px rgba(226, 232, 240, 0.8) !important;
             padding-top: 10px !important;
-            padding-bottom: 18px !important;
+            padding-bottom: 34px !important;
             padding-left: 22px !important;
             padding-right: 22px !important;
         }
@@ -1247,6 +1247,7 @@ def auth_ui():
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
             margin-top: 10px;
+            padding-bottom: 8px;
             text-align: center;
         }
         .trust-item {

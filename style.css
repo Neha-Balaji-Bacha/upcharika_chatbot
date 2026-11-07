@@ -45,6 +45,7 @@ div[data-testid="stDecoration"] {
 div[data-testid="stAppViewBlockContainer"],
 .block-container {
     padding-top: 8px !important;
+    padding-bottom: 34px !important;
     margin-top: 0 !important;
 }
 
@@ -401,6 +402,7 @@ div.stButton > button:focus-visible {
     grid-template-columns: repeat(3, 1fr);
     gap: 12px;
     margin-top: 10px;
+    padding-bottom: 8px;
     text-align: center;
 }
 
