@@ -814,6 +814,198 @@ def generate_voice(text, lang):
     except Exception:
         return None
 
+# ================= UI LOCALIZATION (i18n) =================
+UI_STRINGS = {
+    "English": {
+        "portal_tag": "Clinical AI Portal",
+        "portal_desc": "Hospital-Grade AI Healthcare Assistance & Triage System",
+        "lang_label": "Language",
+        "sign_in_tab": "Sign In",
+        "register_tab": "Register",
+        "username": "Username",
+        "username_placeholder": "Enter your registered username",
+        "password": "Password",
+        "password_placeholder": "Enter your password",
+        "choose_username": "Choose Username",
+        "choose_username_placeholder": "Enter a unique username",
+        "choose_password": "Choose Password",
+        "choose_password_placeholder": "Create a secure password",
+        "btn_signin": "Sign In to Portal  →",
+        "btn_register": "Create Account  →",
+        "fill_both": "Please fill in both fields.",
+        "reg_success": "Account created successfully. Please click Sign In to continue.",
+        "err_user_not_found": "User not found.",
+        "err_invalid_pw": "Invalid password.",
+        "err_user_exists": "Username already exists.",
+        "trust_encrypted": "End-to-End<br>Encrypted",
+        "trust_engine": "Clinical<br>RAG + Groq AI",
+        "trust_multilingual": "Multilingual<br>Guidance",
+        "or_divider": "or",
+        "verified_user": "Verified User",
+        "nav_chat": "💬 Chat Assistant",
+        "nav_history": "🕒 Consultation History",
+        "nav_settings": "⚙️ Settings",
+        "consult_lang": "Consultation Language",
+        "test_mode_toggle": "🧪 Test Mode: Disable Groq",
+        "test_mode_help": "Enable this to demonstrate that answers are fetched directly from your medical textbook without Groq AI.",
+        "textbooks_ready": "Medical Textbooks: {count:,} vectors ready",
+        "connecting_library": "Connecting Medical Library...",
+        "loading_vectors": "Loading 77,636 verified vectors from 9 textbooks",
+        "btn_connect_now": "🔄 Connect Textbooks Now",
+        "btn_clear_history": "Clear History",
+        "clear_history_help": "Reset conversation",
+        "btn_sign_out": "Sign Out",
+        "sign_out_help": "Sign out of portal",
+        "emergency_title": "⚠️ EMERGENCY ASSISTANCE",
+        "emergency_desc": "If you or someone else is experiencing critical or life-threatening symptoms:",
+        "ambulance": "🚑 Ambulance: <b>108 / 112</b>",
+        "helpline": "📞 National Health Helpline: <b>1800-180-1104</b>",
+        "disclaimer": "UpCharika provides clinical triage and health information support only. Always consult a licensed medical practitioner for diagnosis.",
+        "chat_title": "UpCharika Clinical Assistant",
+        "chat_subtitle": "Active Clinical Engine • Medical Textbook RAG + Groq AI",
+        "welcome_title": "Welcome to UpCharika Clinical Consultation",
+        "welcome_desc": "Describe your symptoms, ask about medications, or request clinical triage guidance.",
+        "user_label": "You",
+        "audio_consultation": "Audio Consultation:",
+        "input_placeholder": "Ask a medical question or describe clinical symptoms...",
+        "evaluating_spinner": "Evaluating clinical inquiry...",
+        "translating_spinner": "Translating consultation to {lang}...",
+        "badge_rag_groq": "📖 Medical Textbook Grounded + Groq AI",
+        "badge_textbook_direct": "📚 100% Direct Textbook (Groq OFF)",
+        "badge_groq": "⚡ Groq AI Engine",
+        "badge_offline": "📋 Offline Clinical KB"
+    },
+    "Marathi": {
+        "portal_tag": "क्लिनिकल एआय पोर्टल",
+        "portal_desc": "रुग्णालय-दर्जाचे एआय आरोग्य सहाय्य आणि ट्रायज प्रणाली",
+        "lang_label": "भाषा निवडा",
+        "sign_in_tab": "साइन इन",
+        "register_tab": "नोंदणी",
+        "username": "वापरकर्ता नाव (Username)",
+        "username_placeholder": "आपले नोंदणीकृत वापरकर्ता नाव प्रविष्ट करा",
+        "password": "पासवर्ड (Password)",
+        "password_placeholder": "आपला पासवर्ड प्रविष्ट करा",
+        "choose_username": "नवीन वापरकर्ता नाव निवडा",
+        "choose_username_placeholder": "एक अद्वितीय वापरकर्ता नाव प्रविष्ट करा",
+        "choose_password": "सुरक्षित पासवर्ड तयार करा",
+        "choose_password_placeholder": "किमान ६ अक्षरांचा पासवर्ड प्रविष्ट करा",
+        "btn_signin": "पोर्टलमध्ये साइन इन करा  →",
+        "btn_register": "नवीन खाते तयार करा  →",
+        "fill_both": "कृपया दोन्ही माहिती भरा.",
+        "reg_success": "खाते यशस्वीरित्या तयार झाले. कृपया साइन इन वर क्लिक करा.",
+        "err_user_not_found": "वापरकर्ता सापडला नाही.",
+        "err_invalid_pw": "चुकीचा पासवर्ड.",
+        "err_user_exists": "हे वापरकर्ता नाव आधीपासून अस्तित्वात आहे.",
+        "trust_encrypted": "एंड-टू-एंड<br>एनक्रिप्टेड",
+        "trust_engine": "क्लिनिकल<br>RAG + ग्रॉक AI",
+        "trust_multilingual": "त्रिभाषिक<br>मार्गदर्शन",
+        "or_divider": "किंवा",
+        "verified_user": "सत्यापित वापरकर्ता",
+        "nav_chat": "💬 चॅट सहाय्यक",
+        "nav_history": "🕒 सल्लागार इतिहास",
+        "nav_settings": "⚙️ सेटिंग्ज",
+        "consult_lang": "सल्लागार भाषा",
+        "test_mode_toggle": "🧪 चाचणी मोड: ग्रॉक बंद करा",
+        "test_mode_help": "ग्रॉक AI शिवाय थेट वैद्यकीय संदर्भ ग्रंथातून उत्तरे घेतली जातात हे दाखवण्यासाठी हे चालू करा.",
+        "textbooks_ready": "वैद्यकीय संदर्भ ग्रंथ: {count:,} वेक्टर्स सज्ज",
+        "connecting_library": "वैद्यकीय ग्रंथालय जोडत आहे...",
+        "loading_vectors": "९ संदर्भ ग्रंथांमधून ७७,६३६ वेक्टर्स लोड करत आहे",
+        "btn_connect_now": "🔄 संदर्भ ग्रंथ आता जोडा",
+        "btn_clear_history": "इतिहास साफ करा",
+        "clear_history_help": "संभाषण रीसेट करा",
+        "btn_sign_out": "बाहेर पडा",
+        "sign_out_help": "पोर्टलमधून बाहेर पडा",
+        "emergency_title": "⚠️ तातडीची वैद्यकीय मदत",
+        "emergency_desc": "जर तुम्ही किंवा इतर कोणी गंभीर किंवा जीवघेणी लक्षणे अनुभवत असाल तर:",
+        "ambulance": "🚑 रुग्णवाहिका: <b>108 / 112</b>",
+        "helpline": "📞 राष्ट्रीय आरोग्य हेल्पलाइन: <b>1800-180-1104</b>",
+        "disclaimer": "उपचारिका केवळ क्लिनिकल ट्रायज आणि आरोग्य माहिती सहाय्य प्रदान करते. निश्चित निदानासाठी नेहमी परवानाधारक डॉक्टरांचा सल्ला घ्या.",
+        "chat_title": "उपचारिका क्लिनिकल सहाय्यक",
+        "chat_subtitle": "सक्रिय क्लिनिकल इंजिन • वैद्यकीय संदर्भ ग्रंथ RAG + ग्रॉक AI",
+        "welcome_title": "उपचारिका क्लिनिकल सल्लागार पोर्टलवर आपले स्वागत आहे",
+        "welcome_desc": "आपल्या लक्षणांचे वर्णन करा, औषधांविषयी माहिती विचारा किंवा प्रथमोपचार मार्गदर्शन मिळवा.",
+        "user_label": "तुम्ही",
+        "audio_consultation": "ऑडिओ सल्लागार:",
+        "input_placeholder": "वैद्यकीय प्रश्न विचारा किंवा लक्षणांचे वर्णन करा...",
+        "evaluating_spinner": "वैद्यकीय प्रश्नाचे विश्लेषण करत आहे...",
+        "translating_spinner": "सल्लागार {lang} मध्ये अनुवादित करत आहे...",
+        "badge_rag_groq": "📖 वैद्यकीय ग्रंथ आधारित + ग्रॉक AI",
+        "badge_textbook_direct": "📚 १००% थेट वैद्यकीय ग्रंथ (ग्रॉक बंद)",
+        "badge_groq": "⚡ ग्रॉक AI इंजिन",
+        "badge_offline": "📋 ऑफलाइन क्लिनिकल ज्ञानकोश"
+    },
+    "Hindi": {
+        "portal_tag": "क्लिनिकल एआई पोर्टल",
+        "portal_desc": "अस्पताल-स्तरीय एआई स्वास्थ्य सहायता एवं ट्राइएज प्रणाली",
+        "lang_label": "भाषा चुनें",
+        "sign_in_tab": "लॉग इन",
+        "register_tab": "पंजीकरण",
+        "username": "उपयोगकर्ता नाम (Username)",
+        "username_placeholder": "अपना पंजीकृत उपयोगकर्ता नाम दर्ज करें",
+        "password": "पासवर्ड (Password)",
+        "password_placeholder": "अपना पासवर्ड दर्ज करें",
+        "choose_username": "नया उपयोगकर्ता नाम चुनें",
+        "choose_username_placeholder": "एक अद्वितीय उपयोगकर्ता नाम दर्ज करें",
+        "choose_password": "सुरक्षित पासवर्ड बनाएं",
+        "choose_password_placeholder": "कम से कम ६ अक्षरों का पासवर्ड बनाएं",
+        "btn_signin": "पोर्टल में लॉग इन करें  →",
+        "btn_register": "नया खाता बनाएं  →",
+        "fill_both": "कृपया दोनों विवरण भरें।",
+        "reg_success": "खाता सफलतापूर्वक बन गया है। कृपया जारी रखने के लिए लॉग इन करें।",
+        "err_user_not_found": "उपयोगकर्ता नहीं मिला।",
+        "err_invalid_pw": "अमान्य पासवर्ड।",
+        "err_user_exists": "यह उपयोगकर्ता नाम पहले से मौजूद है।",
+        "trust_encrypted": "एंड-टू-एंड<br>एन्क्रिप्टेड",
+        "trust_engine": "क्लिनिकल<br>RAG + ग्रॉक AI",
+        "trust_multilingual": "त्रिभाषी<br>मार्गदर्शन",
+        "or_divider": "या",
+        "verified_user": "सत्यापित उपयोगकर्ता",
+        "nav_chat": "💬 चैट सहायक",
+        "nav_history": "🕒 परामर्श इतिहास",
+        "nav_settings": "⚙️ सेटिंग्स",
+        "consult_lang": "परामर्श भाषा",
+        "test_mode_toggle": "🧪 परीक्षण मोड: ग्रॉक अक्षम करें",
+        "test_mode_help": "ग्रॉक AI के बिना सीधे चिकित्सा पाठ्यपुस्तकों से उत्तर प्राप्त करने के लिए इसे चालू करें।",
+        "textbooks_ready": "चिकित्सा संदर्भ ग्रंथ: {count:,} वेक्टर्स तैयार",
+        "connecting_library": "चिकित्सा पुस्तकालय कनेक्ट हो रहा है...",
+        "loading_vectors": "९ संदर्भ पुस्तकों से ७७,६३६ वेक्टर्स लोड हो रहे हैं",
+        "btn_connect_now": "🔄 संदर्भ पुस्तकें अभी कनेक्ट करें",
+        "btn_clear_history": "इतिहास हटाएं",
+        "clear_history_help": "बातचीत रीसेट करें",
+        "btn_sign_out": "लॉग आउट करें",
+        "sign_out_help": "पोर्टल से बाहर निकलें",
+        "emergency_title": "⚠️ आपातकालीन सहायता",
+        "emergency_desc": "यदि आप या कोई अन्य व्यक्ति गंभीर या जानलेवा लक्षण महसूस कर रहा है:",
+        "ambulance": "🚑 एम्बुलेंस: <b>108 / 112</b>",
+        "helpline": "📞 राष्ट्रीय स्वास्थ्य हेल्पलाइन: <b>1800-180-1104</b>",
+        "disclaimer": "उपचारिका केवल चिकित्सीय ट्राइएज और स्वास्थ्य जानकारी सहायता प्रदान करती है। अंतिम निदान के लिए हमेशा लाइसेंस प्राप्त चिकित्सक से परामर्श लें।",
+        "chat_title": "उपचारिका चिकित्सीय सहायक",
+        "chat_subtitle": "सक्रिय चिकित्सीय इंजन • चिकित्सा पाठ्यपुस्तक RAG + ग्रॉक AI",
+        "welcome_title": "उपचारिका चिकित्सीय परामर्श पोर्टल में आपका स्वागत है",
+        "welcome_desc": "अपने लक्षणों का वर्णन करें, दवाओं के बारे में पूछें, या प्राथमिक चिकित्सीय मार्गदर्शन प्राप्त करें।",
+        "user_label": "आप",
+        "audio_consultation": "ऑडियो परामर्श:",
+        "input_placeholder": "चिकित्सीय प्रश्न पूछें या लक्षणों का वर्णन करें...",
+        "evaluating_spinner": "चिकित्सीय प्रश्न का विश्लेषण हो रहा है...",
+        "translating_spinner": "परामर्श {lang} में अनुवादित हो रहा है...",
+        "badge_rag_groq": "📖 चिकित्सा ग्रंथ आधारित + ग्रॉक AI",
+        "badge_textbook_direct": "📚 १००% सीधा चिकित्सा ग्रंथ (ग्रॉक बंद)",
+        "badge_groq": "⚡ ग्रॉक AI इंजन",
+        "badge_offline": "📋 ऑफलाइन चिकित्सीय ज्ञानकोश"
+    }
+}
+
+def t(key, **kwargs):
+    current_lang = st.session_state.get("selected_lang", "English")
+    lang_dict = UI_STRINGS.get(current_lang, UI_STRINGS["English"])
+    text_val = lang_dict.get(key, UI_STRINGS["English"].get(key, key))
+    if kwargs:
+        try:
+            return text_val.format(**kwargs)
+        except Exception:
+            return text_val
+    return text_val
+
 # ================= AUTH UI =================
 def auth_ui():
     if "auth_mode" not in st.session_state:
@@ -1030,12 +1222,36 @@ def auth_ui():
     """, unsafe_allow_html=True)
 
     with st.container():
-        st.markdown("""
+        # Language Selector Bar at top of Auth Card
+        col_l1, col_l2 = st.columns([1.2, 1.8])
+        with col_l1:
+            st.markdown(f'<div style="font-size:12.5px; font-weight:700; color:#4f46e5; padding-top:6px;">🌐 {t("lang_label")}</div>', unsafe_allow_html=True)
+        with col_l2:
+            lang_opts = ["English", "Hindi", "Marathi"]
+            curr_l = st.session_state.get("selected_lang", "English")
+            idx = lang_opts.index(curr_l) if curr_l in lang_opts else 0
+            chosen_l = st.selectbox(
+                "Auth Language",
+                lang_opts,
+                index=idx,
+                key="auth_lang_select",
+                label_visibility="collapsed"
+            )
+            if chosen_l != st.session_state.get("selected_lang"):
+                st.session_state.selected_lang = chosen_l
+                try:
+                    cookies["selected_lang"] = chosen_l
+                    cookies.save()
+                except Exception:
+                    pass
+                st.rerun()
+
+        st.markdown(f"""
         <div class="auth-header-block">
             <div class="brand-glow-circle">🩺</div>
             <h1 class="brand-heading">Up<span class="brand-heading-gradient">Charika</span></h1>
-            <div class="brand-portal-tag">Clinical AI Portal</div>
-            <p class="brand-caption">Hospital-Grade AI Healthcare Assistance & Triage System</p>
+            <div class="brand-portal-tag">{t("portal_tag")}</div>
+            <p class="brand-caption">{t("portal_desc")}</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -1043,23 +1259,23 @@ def auth_ui():
         col_t1, col_t2 = st.columns(2)
         with col_t1:
             is_sign_in = (st.session_state.auth_mode == "signin")
-            if st.button("Sign In", key="toggle_signin", use_container_width=True, type="primary" if is_sign_in else "secondary"):
+            if st.button(t("sign_in_tab"), key="toggle_signin", use_container_width=True, type="primary" if is_sign_in else "secondary"):
                 st.session_state.auth_mode = "signin"
                 st.rerun()
         with col_t2:
             is_reg = (st.session_state.auth_mode == "register")
-            if st.button("Register", key="toggle_reg", use_container_width=True, type="primary" if is_reg else "secondary"):
+            if st.button(t("register_tab"), key="toggle_reg", use_container_width=True, type="primary" if is_reg else "secondary"):
                 st.session_state.auth_mode = "register"
                 st.rerun()
 
         if st.session_state.auth_mode == "signin":
-            user = st.text_input("Username", key="login_user", placeholder="Enter your registered username")
-            pw = st.text_input("Password", type="password", key="login_pw", placeholder="Enter your password")
-            btn_login = st.button("Sign In to Portal  →", key="btn_login", type="primary", use_container_width=True)
+            user = st.text_input(t("username"), key="login_user", placeholder=t("username_placeholder"))
+            pw = st.text_input(t("password"), type="password", key="login_pw", placeholder=t("password_placeholder"))
+            btn_login = st.button(t("btn_signin"), key="btn_login", type="primary", use_container_width=True)
 
             if btn_login:
                 if not user or not pw:
-                    st.warning("Please fill in both fields.")
+                    st.warning(t("fill_both"))
                 else:
                     ok, msg = login_user(user, pw)
                     if ok:
@@ -1069,41 +1285,47 @@ def auth_ui():
 
                         cookies["logged_in"] = "true"
                         cookies["username"] = user
-                        cookies.save()
+                        try:
+                            cookies["selected_lang"] = st.session_state.selected_lang
+                            cookies.save()
+                        except Exception:
+                            pass
                         st.rerun()
                     else:
-                        st.error(msg)
+                        err_text = t("err_user_not_found") if "not found" in msg.lower() else (t("err_invalid_pw") if "password" in msg.lower() else msg)
+                        st.error(err_text)
         else:
-            new_user = st.text_input("Choose Username", key="reg_user", placeholder="Enter a unique username")
-            new_pw = st.text_input("Choose Password", type="password", key="reg_pw", placeholder="Create a secure password")
-            btn_reg = st.button("Create Account  →", key="btn_reg", type="primary", use_container_width=True)
+            new_user = st.text_input(t("choose_username"), key="reg_user", placeholder=t("choose_username_placeholder"))
+            new_pw = st.text_input(t("choose_password"), type="password", key="reg_pw", placeholder=t("choose_password_placeholder"))
+            btn_reg = st.button(t("btn_register"), key="btn_reg", type="primary", use_container_width=True)
 
             if btn_reg:
                 if not new_user or not new_pw:
-                    st.warning("Please fill in both fields.")
+                    st.warning(t("fill_both"))
                 else:
                     ok, msg = register_user(new_user, new_pw)
                     if ok:
-                        st.success(f"{msg}. Please click Sign In to continue.")
+                        st.success(t("reg_success"))
                     else:
-                        st.error(msg)
+                        err_text = t("err_user_exists") if "already exists" in msg.lower() else msg
+                        st.error(err_text)
 
-        st.markdown("""
+        st.markdown(f"""
         <div class="auth-divider">
-            <span>or</span>
+            <span>{t("or_divider")}</span>
         </div>
         <div class="trust-grid">
             <div class="trust-item">
                 <svg class="trust-icon-svg" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-                <span class="trust-text">End-to-End<br>Encrypted</span>
+                <span class="trust-text">{t("trust_encrypted")}</span>
             </div>
             <div class="trust-item">
                 <svg class="trust-icon-svg" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04z"/></svg>
-                <span class="trust-text">Clinical<br>LLaMA 3.1</span>
+                <span class="trust-text">{t("trust_engine")}</span>
             </div>
             <div class="trust-item">
                 <svg class="trust-icon-svg" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                <span class="trust-text">Multilingual<br>Guidance</span>
+                <span class="trust-text">{t("trust_multilingual")}</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -1135,20 +1357,20 @@ def chatbot_ui(username):
             <div class="sidebar-brand-icon">🩺</div>
             <div>
                 <h3 class="sidebar-brand-title">UpCharika</h3>
-                <div class="sidebar-brand-sub">Clinical AI Portal</div>
+                <div class="sidebar-brand-sub">{t("portal_tag")}</div>
             </div>
         </div>
         <div class="user-profile-card">
             <div class="user-avatar-circle">👤</div>
             <div class="user-info">
                 <div class="user-name">{username}</div>
-                <div class="user-status-verified"><span class="verified-dot"></span> Verified User</div>
+                <div class="user-status-verified"><span class="verified-dot"></span> {t("verified_user")}</div>
             </div>
         </div>
         <div class="nav-menu">
-            <div class="nav-item active">💬 Chat Assistant</div>
-            <div class="nav-item">🕒 Consultation History</div>
-            <div class="nav-item">⚙️ Settings</div>
+            <div class="nav-item active">{t("nav_chat")}</div>
+            <div class="nav-item">{t("nav_history")}</div>
+            <div class="nav-item">{t("nav_settings")}</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -1158,32 +1380,32 @@ def chatbot_ui(username):
         st.markdown("---")
         lang_list = ["English", "Hindi", "Marathi"]
         curr_idx = lang_list.index(st.session_state.selected_lang) if st.session_state.selected_lang in lang_list else 0
-        lang = st.selectbox("Consultation Language", lang_list, index=curr_idx)
+        lang = st.selectbox(t("consult_lang"), lang_list, index=curr_idx)
 
         # Developer / Examiner Test Toggle
         force_offline = st.checkbox(
-            "🧪 Test Mode: Disable Groq",
+            t("test_mode_toggle"),
             value=False,
-            help="Enable this to demonstrate that answers are fetched directly from your medical textbook without Groq AI."
+            help=t("test_mode_help")
         )
 
         vs_status = get_vectorstore_status()
         if vs_status["loaded"]:
             st.markdown(
                 f'<div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:6px 10px; margin:4px 0 10px 0; font-size:11.5px; color:#1e40af; display:flex; align-items:center; gap:6px;">'
-                f'<span>📚</span> <span><b>Medical Textbooks:</b> {vs_status["count"]:,} vectors ready</span>'
+                f'<span>📚</span> <span><b>{t("textbooks_ready", count=vs_status["count"])}</b></span>'
                 f'</div>',
                 unsafe_allow_html=True
             )
         else:
             st.markdown(
                 f'<div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:8px 12px; margin:4px 0 6px 0; font-size:12px; color:#1e40af;">'
-                f'<div style="display:flex; align-items:center; gap:6px; font-weight:600;"><span>⏳</span> <span>Connecting Medical Library...</span></div>'
-                f'<div style="font-size:11px; margin-top:3px; color:#3b82f6;">Loading 77,636 verified vectors from 9 textbooks</div>'
+                f'<div style="display:flex; align-items:center; gap:6px; font-weight:600;"><span>⏳</span> <span>{t("connecting_library")}</span></div>'
+                f'<div style="font-size:11px; margin-top:3px; color:#3b82f6;">{t("loading_vectors")}</div>'
                 f'</div>',
                 unsafe_allow_html=True
             )
-            if st.button("🔄 Connect Textbooks Now", use_container_width=True, help="Click to connect the 9 medical textbooks"):
+            if st.button(t("btn_connect_now"), use_container_width=True, help="Click to connect the 9 medical textbooks"):
                 with st.spinner("Connecting 77,636 medical textbook vectors..."):
                     try:
                         st.cache_resource.clear()
@@ -1197,7 +1419,12 @@ def chatbot_ui(username):
         if lang != st.session_state.selected_lang:
             prev_l = st.session_state.selected_lang
             st.session_state.selected_lang = lang
-            with st.spinner(f"Translating consultation to {lang}..."):
+            try:
+                cookies["selected_lang"] = lang
+                cookies.save()
+            except Exception:
+                pass
+            with st.spinner(t("translating_spinner", lang=lang)):
                 for msg in st.session_state.chat_history:
                     if msg.get("role") == "bot":
                         raw_src = msg.get("raw_text", msg.get("text", ""))
@@ -1215,11 +1442,11 @@ def chatbot_ui(username):
 
         col_clear, col_logout = st.columns(2)
         with col_clear:
-            if st.button("Clear History", help="Reset conversation"):
+            if st.button(t("btn_clear_history"), help=t("clear_history_help")):
                 st.session_state.chat_history = []
                 st.rerun()
         with col_logout:
-            if st.button("Sign Out", help="Sign out"):
+            if st.button(t("btn_sign_out"), help=t("sign_out_help")):
                 st.session_state.logged_in = False
                 cookies["logged_in"] = ""
                 cookies["username"] = ""
@@ -1227,25 +1454,25 @@ def chatbot_ui(username):
                 st.rerun()
 
         st.markdown("---")
-        st.markdown("""
+        st.markdown(f"""
         <div class="emergency-box">
-            <div class="emergency-header">⚠️ EMERGENCY ASSISTANCE</div>
-            <p>If you or someone else is experiencing critical or life-threatening symptoms:</p>
-            <div class="helpline-row">🚑 Ambulance: <b>108 / 112</b></div>
-            <div class="helpline-row">📞 National Health Helpline: <b>1800-180-1104</b></div>
+            <div class="emergency-header">{t("emergency_title")}</div>
+            <p>{t("emergency_desc")}</p>
+            <div class="helpline-row">{t("ambulance")}</div>
+            <div class="helpline-row">{t("helpline")}</div>
         </div>
         """, unsafe_allow_html=True)
 
-        st.caption("UpCharika provides clinical triage and health information support only. Always consult a licensed medical practitioner for diagnosis.")
+        st.caption(t("disclaimer"))
 
     # Main Chat View matching Mockup Image 2
-    st.markdown("""
+    st.markdown(f"""
     <div class="chat-header">
         <div class="chat-header-main">
             <div class="chat-header-logo-box">🩺</div>
             <div>
-                <h2 class="chat-header-title">UpCharika Clinical Assistant</h2>
-                <div class="chat-header-subtitle"><span class="status-indicator"></span> Active Clinical Engine • Medical Textbook RAG + Groq AI</div>
+                <h2 class="chat-header-title">{t("chat_title")}</h2>
+                <div class="chat-header-subtitle"><span class="status-indicator"></span> {t("chat_subtitle")}</div>
             </div>
         </div>
     </div>
@@ -1256,10 +1483,10 @@ def chatbot_ui(username):
 
     # Welcome card if no messages
     if len(st.session_state.chat_history) == 0:
-        st.markdown("""
+        st.markdown(f"""
         <div class="welcome-card">
-            <h3>Welcome to UpCharika Clinical Consultation</h3>
-            <p>Describe your symptoms, ask about medications, or request clinical triage guidance.</p>
+            <h3>{t("welcome_title")}</h3>
+            <p>{t("welcome_desc")}</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -1290,7 +1517,7 @@ def chatbot_ui(username):
             with col:
                 if st.button(f"{icon}  {text}", key=f"sugg_{idx}", use_container_width=True):
                     st.session_state.chat_history.append({"role": "user", "text": text})
-                    with st.spinner("Evaluating clinical inquiry..."):
+                    with st.spinner(t("evaluating_spinner")):
                         try:
                             ans, source = get_ai_response(text, lang=lang, force_offline=force_offline)
                             trans = translate_text(ans, lang, force_offline=force_offline)
@@ -1327,7 +1554,7 @@ def chatbot_ui(username):
             user_card_html = (
                 '<div class="chat-row user-row">'
                 '<div class="user-bubble">'
-                '<div class="bubble-header">You</div>'
+                f'<div class="bubble-header">{t("user_label")}</div>'
                 f'<div class="bubble-body">{msg["text"]}</div>'
                 '</div>'
                 '</div>'
@@ -1339,20 +1566,20 @@ def chatbot_ui(username):
             source_badge = ""
             msg_source = msg.get("source")
             if msg_source in ["rag", "rag_groq"]:
-                source_badge = '<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#eff6ff; color:#1d4ed8; padding:3px 10px; border-radius:12px; border:1px solid #bfdbfe; font-weight:600; margin-left:10px;">📖 Medical Textbook Grounded + Groq AI</span>'
+                source_badge = f'<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#eff6ff; color:#1d4ed8; padding:3px 10px; border-radius:12px; border:1px solid #bfdbfe; font-weight:600; margin-left:10px;">{t("badge_rag_groq")}</span>'
             elif msg_source == "textbook_direct":
-                source_badge = '<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#f5f3ff; color:#6d28d9; padding:3px 10px; border-radius:12px; border:1px solid #ddd6fe; font-weight:600; margin-left:10px;">📚 100% Direct Textbook (Groq OFF)</span>'
+                source_badge = f'<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#f5f3ff; color:#6d28d9; padding:3px 10px; border-radius:12px; border:1px solid #ddd6fe; font-weight:600; margin-left:10px;">{t("badge_textbook_direct")}</span>'
             elif msg_source == "groq":
-                source_badge = '<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#f0fdf4; color:#15803d; padding:3px 10px; border-radius:12px; border:1px solid #bbf7d0; font-weight:600; margin-left:10px;">⚡ Groq AI Engine</span>'
+                source_badge = f'<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#f0fdf4; color:#15803d; padding:3px 10px; border-radius:12px; border:1px solid #bbf7d0; font-weight:600; margin-left:10px;">{t("badge_groq")}</span>'
             elif msg_source == "offline":
-                source_badge = '<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#fefce8; color:#a16207; padding:3px 10px; border-radius:12px; border:1px solid #fef08a; font-weight:600; margin-left:10px;">📋 Offline Clinical KB</span>'
+                source_badge = f'<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#fefce8; color:#a16207; padding:3px 10px; border-radius:12px; border:1px solid #fef08a; font-weight:600; margin-left:10px;">{t("badge_offline")}</span>'
 
             bot_card_html = (
                 '<div class="chat-row bot-row">'
                 '<div class="bot-card">'
                 '<div class="bot-header" style="display:flex; align-items:center; flex-wrap:wrap;">'
                 '<div class="bot-avatar-box">🩺</div>'
-                '<span class="bot-title">UpCharika Clinical Assistant</span>'
+                f'<span class="bot-title">{t("chat_title")}</span>'
                 f'{source_badge}'
                 '</div>'
                 f'<div class="bot-body">{formatted_content}</div>'
@@ -1362,19 +1589,14 @@ def chatbot_ui(username):
             st.markdown(bot_card_html, unsafe_allow_html=True)
             if msg.get("audio"):
                 st.markdown("<div class='audio-row'>", unsafe_allow_html=True)
-                st.caption("Audio Consultation:")
+                st.caption(t("audio_consultation"))
                 st.audio(msg["audio"])
                 st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("</div>", unsafe_allow_html=True)
 
     # User Input
-    input_placeholders = {
-        "English": "Ask a medical question or describe clinical symptoms...",
-        "Marathi": "वैद्यकीय प्रश्न विचारा किंवा लक्षणांचे वर्णन करा...",
-        "Hindi": "चिकित्सीय प्रश्न पूछें या लक्षणों का वर्णन करें..."
-    }
-    chat_placeholder = input_placeholders.get(lang, input_placeholders["English"])
+    chat_placeholder = t("input_placeholder")
     user_input = st.chat_input(chat_placeholder)
     if user_input:
         if not (st.session_state.chat_history and 
@@ -1382,7 +1604,7 @@ def chatbot_ui(username):
                 st.session_state.chat_history[-1].get("text") == user_input):
             st.session_state.chat_history.append({"role": "user", "text": user_input})
 
-        with st.spinner("Evaluating clinical inquiry..."):
+        with st.spinner(t("evaluating_spinner")):
             try:
                 answer, source = get_ai_response(user_input, lang=lang, force_offline=force_offline)
                 translated = translate_text(answer, lang, force_offline=force_offline)
@@ -1410,6 +1632,14 @@ def chatbot_ui(username):
 
 # ================= MAIN =================
 def main():
+    # Persistent Language Selection from Cookies or Default to English
+    if "selected_lang" not in st.session_state:
+        saved_lang = cookies.get("selected_lang")
+        if saved_lang in ["English", "Hindi", "Marathi"]:
+            st.session_state.selected_lang = saved_lang
+        else:
+            st.session_state.selected_lang = "English"
+
     # Preload Vectorstore into memory
     if "vs_loaded" not in st.session_state:
         get_vectorstore_safe()
