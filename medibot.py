@@ -132,6 +132,12 @@ def get_vectorstore():
         model_kwargs={"device": "cpu"}
     )
     db = FAISS.load_local(target_dir, embed, allow_dangerous_deserialization=True)
+    try:
+        # Pre-warm embeddings model and FAISS search index so first user query has 0s latency
+        db.similarity_search("clinical triage warmup query", k=1)
+        print("[FAISS Ready] Pre-warm query search completed successfully!")
+    except Exception as e:
+        print(f"[FAISS Warmup Notice] {e}")
     print(f"[FAISS Ready] Successfully loaded {db.index.ntotal} medical vectors from 9 textbooks.")
     return db
 
@@ -351,7 +357,7 @@ def format_medical_card(text):
             header_prefixes = [
                 "cause", "causes", "solution", "solutions", "care", "medicine", "medication", "medications", "when to see doctor", "emergency",
                 "कारण", "कारणे", "उपाय", "घरगुती उपाय", "काळजी", "औषध", "औषधे", "औषधोपचार", "डॉक्टर", "तातडी", "आणीबाणी",
-                "समाधान", "दवा", "दवाई", "आपात"
+                "समाधान", "दवा", "दवाई", "दवाइयां", "आपात", "आपातकालीन", "डॉक्टर से परामर्श"
             ]
             if any(hp in first_part for hp in header_prefixes):
                 is_header = True
@@ -403,11 +409,9 @@ def format_medical_card(text):
 
 # ================= AI =================
 AVAILABLE_GROQ_MODELS = [
-    "qwen/qwen3.8-27b",
     "openai/gpt-oss-20b",
     "openai/gpt-oss-120b",
-    "llama-3.3-70b-versatile",
-    "llama-3.1-8b-instant"
+    "qwen/qwen3.8-27b"
 ]
 
 def call_groq_chat(client, messages, temperature=0.3):
@@ -581,30 +585,70 @@ Always conclude by reminding the patient to consult a licensed physician for def
         return "Notice: UpCharika could not generate an answer at this time. Please try again.", "notice"
 
 # ================= TRANSLATION =================
-def translate_chunk_robust(text, target_code):
+def translate_chunk_robust(text, target_code, source_code="auto"):
     if not text or not text.strip():
         return text
 
-    # Strategy 1: GoogleTranslator
+    clean_q = text.strip()
+
+    # Strategy 1: Google GTX Client API (fast, reliable, handles multi-sentence clinical text without 429 errors)
+    try:
+        import urllib.parse
+        import requests
+        url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl={source_code}&tl={target_code}&dt=t&q={urllib.parse.quote(clean_q)}"
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+        resp = requests.get(url, headers=headers, timeout=8)
+        if resp.status_code == 200:
+            data = resp.json()
+            translated = "".join(part[0] for part in data[0] if part[0])
+            if translated and len(translated.strip()) > 0:
+                return translated.strip()
+    except Exception as e:
+        print(f"[GTX Translation Notice] {e}")
+
+    # Strategy 2: deep_translator GoogleTranslator
     try:
         from deep_translator import GoogleTranslator
-        res = GoogleTranslator(source="auto", target=target_code).translate(text)
+        res = GoogleTranslator(source=source_code, target=target_code).translate(clean_q)
         if res and res.strip():
-            return res
-    except Exception:
-        pass
+            return res.strip()
+    except Exception as e:
+        print(f"[GoogleTranslator Notice] {e}")
 
-    # Strategy 2: MyMemoryTranslator
+    # Strategy 3: deep_translator MyMemoryTranslator (chunks < 400 chars)
     try:
         from deep_translator import MyMemoryTranslator
         target_mymemory = "mr-IN" if target_code == "mr" else ("hi-IN" if target_code == "hi" else "en-US")
-        dev_count = sum(1 for c in text if '\u0900' <= c <= '\u097f')
-        source_mymemory = "mr-IN" if (dev_count > len(text) * 0.3 and target_code == "hi") else ("hi-IN" if (dev_count > len(text) * 0.3 and target_code == "mr") else "en-US")
-        res = MyMemoryTranslator(source=source_mymemory, target=target_mymemory).translate(text)
+        dev_count = sum(1 for c in clean_q if '\u0900' <= c <= '\u097f')
+        source_mymemory = "mr-IN" if (dev_count > len(clean_q) * 0.3 and target_code == "hi") else ("hi-IN" if (dev_count > len(clean_q) * 0.3 and target_code == "mr") else "en-US")
+        
+        if len(clean_q) > 400:
+            import re
+            sentences = [s.strip() for s in re.split(r'(?<=[.!?।])\s+', clean_q) if s.strip()]
+            chunks = []
+            curr = ""
+            for s in sentences:
+                if len(curr) + len(s) + 1 < 380:
+                    curr = (curr + " " + s).strip()
+                else:
+                    if curr:
+                        chunks.append(curr)
+                    curr = s
+            if curr:
+                chunks.append(curr)
+            
+            sub_res = []
+            for c in chunks:
+                tr = MyMemoryTranslator(source=source_mymemory, target=target_mymemory).translate(c)
+                sub_res.append(tr or c)
+            res = " ".join(sub_res)
+        else:
+            res = MyMemoryTranslator(source=source_mymemory, target=target_mymemory).translate(clean_q)
+
         if res and res.strip():
-            return res
-    except Exception:
-        pass
+            return res.strip()
+    except Exception as e:
+        print(f"[MyMemory Notice] {e}")
 
     return text
 
@@ -618,42 +662,48 @@ def translate_text(text, lang, force_offline=False, source_lang=None):
     if source_lang and source_lang.strip().lower() == lang.strip().lower():
         return text
 
-    # Verify if text is already in target language
+    # Canonical headers for each target language
+    CANONICAL_HEADERS = {
+        "mr": {
+            "cause": "कारण:",
+            "solution": "उपाय:",
+            "medicine": "औषधे:",
+            "doctor": "डॉक्टरांचा सल्ला:",
+            "emergency": "आणीबाणी:"
+        },
+        "hi": {
+            "cause": "कारण:",
+            "solution": "समाधान:",
+            "medicine": "दवाइयां:",
+            "doctor": "डॉक्टर से परामर्श:",
+            "emergency": "आपातकालीन स्थिति:"
+        },
+        "en": {
+            "cause": "Cause:",
+            "solution": "Solution:",
+            "medicine": "Medicine:",
+            "doctor": "When to see doctor:",
+            "emergency": "Emergency:"
+        }
+    }
+
+    # Verify if text is already completely in target language
     if target_code == "en":
         dev_count = sum(1 for c in text if '\u0900' <= c <= '\u097f')
         if dev_count < len(text) * 0.15:
             return text
     elif target_code == "mr":
-        # Only skip if it genuinely has Marathi-specific headers
-        if any(h in text for h in ["औषधे:", "डॉक्टरांचा सल्ला:", "आणीबाणी:"]):
+        if any(h in text for h in ["औषधे:", "डॉक्टरांचा सल्ला:", "आणीबाणी:"]) and not any(h in text for h in ["Cause:", "Solution:", "Medicine:"]):
             return text
     elif target_code == "hi":
-        # Only skip if it genuinely has Hindi-specific headers
-        if any(h in text for h in ["दवाइयां:", "डॉक्टर से परामर्श:", "आपातकालीन स्थिति:"]):
+        if any(h in text for h in ["दवाइयां:", "डॉक्टर से परामर्श:", "आपातकालीन स्थिति:"]) and not any(h in text for h in ["Cause:", "Solution:", "Medicine:"]):
             return text
-
-    # Standard headers for each target language
-    header_replacements_mr = {
-        "Cause:": "कारण:",
-        "Solution:": "उपाय:",
-        "Medicine:": "औषधे:",
-        "When to see doctor:": "डॉक्टरांचा सल्ला:",
-        "Emergency:": "आणीबाणी:"
-    }
-    header_replacements_hi = {
-        "Cause:": "कारण:",
-        "Solution:": "समाधान:",
-        "Medicine:": "दवाइयां:",
-        "When to see doctor:": "डॉक्टर से परामर्श:",
-        "Emergency:": "आपातकालीन स्थिति:"
-    }
-    repl_map = header_replacements_mr if target_code == "mr" else header_replacements_hi
 
     # Strategy A: If Groq is active (not offline test mode), use AI translation for instant, flawless translation
     if not force_offline:
         active_client = get_groq_client()
         if active_client:
-            expected_headers = list(repl_map.values())
+            expected_headers = list(CANONICAL_HEADERS[target_code].values())
             target_name = "MARATHI (मराठी Devanagari)" if target_code == "mr" else ("HINDI (हिंदी Devanagari)" if target_code == "hi" else "ENGLISH")
             trans_prompt = (
                 f"You are a professional medical translator. Translate the following clinical triage consultation accurately into natural {target_name}.\n"
@@ -666,52 +716,63 @@ def translate_text(text, lang, force_offline=False, source_lang=None):
             if res and len(res.strip()) > 50:
                 return res.strip()
 
-    # Strategy B: Offline or deep_translator fallback
-    # Process section by section to avoid HTTP GET length limits
-    sections = text.split("\n\n")
-    translated_sections = []
-    for sec in sections:
-        sec_s = sec.strip()
-        if not sec_s:
-            translated_sections.append("")
-            continue
+    # Strategy B: Offline / Direct Textbook / deep_translator fallback
+    HEADER_MATCHERS = [
+        ("cause", ["cause:", "कारण:"]),
+        ("solution", ["solution:", "उपाय:", "समाधान:"]),
+        ("medicine", ["medicine:", "औषधे:", "दवाइयां:", "दवाई:", "औषध:"]),
+        ("doctor", ["when to see doctor:", "डॉक्टरांचा सल्ला:", "डॉक्टर से परामर्श:"]),
+        ("emergency", ["emergency:", "आणीबाणी:", "आपातकालीन स्थिति:", "आपात:"])
+    ]
 
-        prefix = ""
-        body = sec_s
-        for eng_hdr, target_hdr in repl_map.items():
-            if sec_s.startswith(eng_hdr):
-                prefix = target_hdr + " "
-                body = sec_s[len(eng_hdr):].strip()
+    import re
+    raw_lines = text.splitlines()
+    sections = []
+    current_cat = None
+    current_body = []
+
+    for line in raw_lines:
+        line_s = line.strip()
+        if not line_s:
+            continue
+        matched_cat = None
+        clean_l = re.sub(r"^[\d\.\-\*•\s]+", "", line_s).strip()
+        clean_l_lower = clean_l.lower()
+
+        for cat, pats in HEADER_MATCHERS:
+            for p in pats:
+                if clean_l_lower.startswith(p):
+                    matched_cat = cat
+                    clean_l = clean_l[len(p):].strip()
+                    break
+            if matched_cat:
                 break
 
-        # Clean and join broken line wraps from PDF excerpts
-        import re
-        body_clean = re.sub(r'Direct excerpt from Medical Reference Textbooks:?', '', body, flags=re.IGNORECASE).strip()
-        body_clean = re.sub(r'\s*\n\s*', ' ', body_clean).strip()
-
-        # If body is long (> 350 chars), split by sentences into chunks < 380 chars for MyMemory/Google limit
-        if len(body_clean) > 350:
-            sentences = [s.strip() for s in re.split(r'(?<=[.!?])\s+', body_clean) if s.strip()]
-            chunks = []
-            curr = ""
-            for s in sentences:
-                if len(curr) + len(s) + 1 < 380:
-                    curr = (curr + " " + s).strip()
-                else:
-                    if curr:
-                        chunks.append(curr)
-                    curr = s
-            if curr:
-                chunks.append(curr)
-
-            trans_subs = []
-            for chunk in chunks:
-                if chunk.strip():
-                    trans_subs.append(translate_chunk_robust(chunk.strip(), target_code))
-            trans_body = " ".join(trans_subs)
+        if matched_cat:
+            if current_cat or current_body:
+                sections.append((current_cat, " ".join(current_body)))
+                current_body = []
+            current_cat = matched_cat
+            if clean_l:
+                current_body.append(clean_l)
         else:
-            trans_body = translate_chunk_robust(body_clean, target_code)
+            current_body.append(clean_l)
 
+    if current_cat or current_body:
+        sections.append((current_cat, " ".join(current_body)))
+
+    translated_sections = []
+    src_code = "mr" if (source_lang and source_lang.lower() == "marathi") else ("hi" if (source_lang and source_lang.lower() == "hindi") else "auto")
+
+    for cat, body_str in sections:
+        body_clean = re.sub(r'Direct excerpt from Medical Reference Textbooks:?', '', body_str, flags=re.IGNORECASE).strip()
+        body_clean = re.sub(r'\s+', ' ', body_clean).strip()
+
+        prefix = ""
+        if cat and cat in CANONICAL_HEADERS[target_code]:
+            prefix = CANONICAL_HEADERS[target_code][cat] + "\n"
+
+        trans_body = translate_chunk_robust(body_clean, target_code, source_code=src_code)
         translated_sections.append(prefix + trans_body)
 
     return "\n\n".join(translated_sections)
@@ -1250,7 +1311,7 @@ def chatbot_ui(username):
             <div class="chat-header-logo-box">🩺</div>
             <div>
                 <h2 class="chat-header-title">UpCharika Clinical Assistant</h2>
-                <div class="chat-header-subtitle"><span class="status-indicator"></span> Active Clinical Engine • LLaMA 3.1 8B</div>
+                <div class="chat-header-subtitle"><span class="status-indicator"></span> Active Clinical Engine • Medical Textbook RAG + Groq AI</div>
             </div>
         </div>
     </div>
@@ -1323,8 +1384,12 @@ def chatbot_ui(username):
 
     # Chat Feed
     st.markdown("<div class='chat-feed'>", unsafe_allow_html=True)
+    prev_user_text = None
     for msg in st.session_state.chat_history:
         if msg["role"] == "user":
+            if msg.get("text") and msg.get("text") == prev_user_text:
+                continue
+            prev_user_text = msg.get("text")
             user_card_html = (
                 '<div class="chat-row user-row">'
                 '<div class="user-bubble">'
@@ -1335,6 +1400,7 @@ def chatbot_ui(username):
             )
             st.markdown(user_card_html, unsafe_allow_html=True)
         else:
+            prev_user_text = None
             formatted_content = format_medical_card(msg['text'])
             source_badge = ""
             msg_source = msg.get("source")
@@ -1377,7 +1443,10 @@ def chatbot_ui(username):
     chat_placeholder = input_placeholders.get(lang, input_placeholders["English"])
     user_input = st.chat_input(chat_placeholder)
     if user_input:
-        st.session_state.chat_history.append({"role": "user", "text": user_input})
+        if not (st.session_state.chat_history and 
+                st.session_state.chat_history[-1].get("role") == "user" and 
+                st.session_state.chat_history[-1].get("text") == user_input):
+            st.session_state.chat_history.append({"role": "user", "text": user_input})
 
         with st.spinner("Evaluating clinical inquiry..."):
             try:
