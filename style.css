@@ -7,6 +7,7 @@
 
 html, body, [class*="css"] {
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-size: 16px !important;
 }
 
 /* Background & Core Theme - Crisp Light Slate */
@@ -73,7 +74,7 @@ div[data-testid="stHorizontalBlock"] div[data-testid="column"] {
 
 .brand-heading {
     font-family: 'Outfit', sans-serif !important;
-    font-size: 32px !important;
+    font-size: 36px !important;
     font-weight: 800 !important;
     color: #0f172a !important;
     letter-spacing: -0.5px !important;
@@ -81,14 +82,14 @@ div[data-testid="stHorizontalBlock"] div[data-testid="column"] {
 }
 
 .brand-portal-tag {
-    font-size: 14px !important;
+    font-size: 15.5px !important;
     font-weight: 600 !important;
     color: #6366f1 !important;
     margin-bottom: 4px !important;
 }
 
 .brand-caption {
-    font-size: 13.5px !important;
+    font-size: 15px !important;
     color: #64748b !important;
     margin: 0 !important;
     line-height: 1.5 !important;
@@ -137,7 +138,7 @@ div[role="tablist"] button {
     align-items: center !important;
     justify-content: center !important;
     font-family: 'Plus Jakarta Sans', sans-serif !important;
-    font-size: 14.5px !important;
+    font-size: 16px !important;
     font-weight: 600 !important;
     padding: 10px 0 !important;
     border-radius: 10px !important;
@@ -156,7 +157,7 @@ div[role="tablist"] button {
 button[data-baseweb="tab"] p,
 button[data-baseweb="tab"] span {
     color: inherit !important;
-    font-size: 14.5px !important;
+    font-size: 16px !important;
     font-weight: 600 !important;
 }
 
@@ -209,7 +210,7 @@ button[data-baseweb="tab"]:active {
    Form Inputs & Labels (Mockup Image 1)
    ========================================================================== */
 label[data-testid="stWidgetLabel"] p {
-    font-size: 13.5px !important;
+    font-size: 15px !important;
     font-weight: 600 !important;
     color: #334155 !important;
     margin-bottom: 6px !important;
@@ -227,7 +228,7 @@ div[data-baseweb="input"] {
     border: 1.5px solid #e2e8f0 !important;
     border-radius: 14px !important;
     color: #0f172a !important;
-    min-height: 50px !important;
+    min-height: 52px !important;
     padding: 4px 14px !important;
     transition: all 0.2s ease !important;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
@@ -245,13 +246,13 @@ div[data-baseweb="input"]:focus-within {
 
 div[data-baseweb="input"] input {
     color: #0f172a !important;
-    font-size: 15px !important;
+    font-size: 16px !important;
     font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
 
 div[data-baseweb="input"] input::placeholder {
     color: #94a3b8 !important;
-    font-size: 14.5px !important;
+    font-size: 15px !important;
 }
 
 /* ==========================================================================
@@ -267,11 +268,11 @@ div.stButton {
 
 div.stButton > button {
     width: 100% !important;
-    min-height: 48px !important;
+    min-height: 50px !important;
     border-radius: 14px !important;
     font-family: 'Plus Jakarta Sans', sans-serif !important;
     font-weight: 600 !important;
-    font-size: 15px !important;
+    font-size: 16px !important;
     transition: all 0.2s ease !important;
     cursor: pointer !important;
 }
@@ -317,7 +318,7 @@ div[data-testid="column"] div.stButton > button[key^="sugg_"] {
     border-radius: 14px !important;
     padding: 16px 18px !important;
     color: #334155 !important;
-    font-size: 14px !important;
+    font-size: 15.5px !important;
     font-weight: 600 !important;
     text-align: left !important;
     justify-content: flex-start !important;
@@ -387,10 +388,10 @@ div.stButton > button:focus-visible {
 }
 
 .trust-text {
-    font-size: 11.5px;
+    font-size: 13px;
     color: #64748b;
     font-weight: 500;
-    line-height: 1.3;
+    line-height: 1.35;
 }
 
 /* ==========================================================================
@@ -414,19 +415,19 @@ div.stButton > button:focus-visible {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
+    font-size: 24px;
 }
 
 .sidebar-brand-title {
     font-family: 'Outfit', sans-serif !important;
-    font-size: 18px !important;
+    font-size: 21px !important;
     font-weight: 700 !important;
     color: #0f172a !important;
     margin: 0 !important;
 }
 
 .sidebar-brand-sub {
-    font-size: 12px !important;
+    font-size: 14px !important;
     color: #6366f1 !important;
     font-weight: 600 !important;
     margin: 0 !important;
@@ -464,11 +465,11 @@ div.stButton > button:focus-visible {
 .user-name {
     font-weight: 700;
     color: #0f172a;
-    font-size: 14.5px;
+    font-size: 16.5px;
 }
 
 .user-status-verified {
-    font-size: 11.5px;
+    font-size: 13px;
     color: #10b981;
     font-weight: 600;
     display: flex;
@@ -499,7 +500,7 @@ div.stButton > button:focus-visible {
     gap: 10px;
     padding: 10px 14px;
     border-radius: 10px;
-    font-size: 13.5px;
+    font-size: 15.5px;
     font-weight: 600;
     color: #64748b;
     text-decoration: none;
@@ -531,7 +532,7 @@ div.stButton > button:focus-visible {
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 11.5px;
+    font-size: 13.5px;
     font-weight: 800;
     color: #dc2626;
     letter-spacing: 0.5px;
@@ -539,17 +540,17 @@ div.stButton > button:focus-visible {
 }
 
 .emergency-box p {
-    font-size: 11.5px;
+    font-size: 13px;
     color: #7f1d1d;
     margin: 0 0 10px 0;
-    line-height: 1.4;
+    line-height: 1.45;
 }
 
 .helpline-row {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 13px;
+    font-size: 14.5px;
     color: #991b1b;
     margin-bottom: 4px;
 }
@@ -590,14 +591,14 @@ div.stButton > button:focus-visible {
 
 .chat-header-title {
     font-family: 'Outfit', sans-serif !important;
-    font-size: 20px !important;
+    font-size: 23px !important;
     font-weight: 700 !important;
     color: #0f172a !important;
     margin: 0 !important;
 }
 
 .chat-header-subtitle {
-    font-size: 13px;
+    font-size: 14.5px;
     color: #64748b;
     margin-top: 3px;
     display: flex;
@@ -626,16 +627,17 @@ div.stButton > button:focus-visible {
 
 .welcome-card h3 {
     font-family: 'Outfit', sans-serif !important;
-    font-size: 22px !important;
+    font-size: 25px !important;
     font-weight: 700 !important;
     color: #0f172a !important;
     margin: 0 0 6px 0 !important;
 }
 
 .welcome-card p {
-    font-size: 14px !important;
+    font-size: 16px !important;
     color: #64748b !important;
     margin: 0 !important;
+    line-height: 1.5 !important;
 }
 
 /* 4 Quick Suggestion Cards (2x2 Grid) */
@@ -686,10 +688,10 @@ div.stButton > button:focus-visible {
 }
 
 .suggestion-text {
-    font-size: 13.5px;
+    font-size: 15.5px;
     font-weight: 500;
     color: #1e293b;
-    line-height: 1.4;
+    line-height: 1.45;
 }
 
 .suggestion-chevron {
@@ -727,16 +729,16 @@ div.stButton > button:focus-visible {
 }
 
 .bubble-header {
-    font-size: 11px;
+    font-size: 12.5px;
     font-weight: 700;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgba(255, 255, 255, 0.85);
     margin-bottom: 4px;
 }
 
 .bubble-body {
-    font-size: 14.5px;
-    line-height: 1.5;
+    font-size: 16.5px;
+    line-height: 1.6;
 }
 
 .bot-card {
@@ -758,19 +760,19 @@ div.stButton > button:focus-visible {
 }
 
 .bot-avatar-box {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: 8px;
     background: #eef2ff;
     color: #4f46e5;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 17px;
 }
 
 .bot-title {
-    font-size: 13.5px;
+    font-size: 16px;
     font-weight: 700;
     color: #0f172a;
     letter-spacing: 0.2px;
@@ -779,29 +781,29 @@ div.stButton > button:focus-visible {
 .med-section-card {
     background: #f8fafc;
     border-radius: 10px;
-    padding: 12px 16px;
-    margin-bottom: 10px;
+    padding: 14px 18px;
+    margin-bottom: 12px;
     border: 1px solid #edf2f7;
 }
 
 .med-section-badge {
-    font-size: 13px;
+    font-size: 15.5px;
     font-weight: 700;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     letter-spacing: 0.2px;
 }
 
 .med-section-text {
-    font-size: 14px;
-    line-height: 1.6;
+    font-size: 16px;
+    line-height: 1.7;
     color: #1e293b;
 }
 
 .med-section-intro {
-    font-size: 14px;
-    line-height: 1.6;
+    font-size: 16px;
+    line-height: 1.7;
     color: #334155;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .audio-row {
@@ -818,6 +820,13 @@ div[data-testid="stChatInput"] {
     border-radius: 28px !important;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05) !important;
     padding: 4px 8px !important;
+}
+
+div[data-testid="stChatInput"] textarea,
+div[data-testid="stChatInput"] input {
+    font-size: 16px !important;
+    line-height: 1.5 !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
 
 div[data-testid="stChatInput"]:focus-within {

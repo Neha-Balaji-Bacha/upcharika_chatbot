@@ -333,8 +333,8 @@ def format_medical_card(text):
         clean_alert_text = text.replace(chr(10), '<br>')
         return (
             '<div class="med-alert-box" style="background:#fffbeb; border:1.5px solid #fef3c7; border-left:4px solid #f59e0b; border-radius:12px; padding:14px 18px; margin:6px 0;">'
-            '<div style="font-weight:700; color:#b45309; margin-bottom:6px; font-size:14px;">Clinical Service Notice</div>'
-            f'<div style="font-size:13.5px; color:#78350f; line-height:1.6;">{clean_alert_text}</div>'
+            '<div style="font-weight:700; color:#b45309; margin-bottom:6px; font-size:15px;">Clinical Service Notice</div>'
+            f'<div style="font-size:15.5px; color:#78350f; line-height:1.65;">{clean_alert_text}</div>'
             '</div>'
         )
 
@@ -397,13 +397,13 @@ def format_medical_card(text):
                 color = "#38bdf8"
 
             html += (
-                f'<div class="med-section-card" style="border-left: 3.5px solid {color}; margin: 8px 0; padding: 10px 14px; background: #ffffff; border-radius: 8px; border: 1px solid #f1f5f9; border-left-width: 4px;">'
-                f'<div class="med-section-badge" style="color: {color}; font-weight: 700; font-size: 13px; margin-bottom: 4px;">{title}</div>'
-                f'<div class="med-section-text" style="color: #334155; font-size: 14px; line-height: 1.6;">{body}</div>'
+                f'<div class="med-section-card" style="border-left: 3.5px solid {color}; margin: 8px 0; padding: 12px 16px; background: #ffffff; border-radius: 8px; border: 1px solid #f1f5f9; border-left-width: 4px;">'
+                f'<div class="med-section-badge" style="color: {color}; font-weight: 700; font-size: 15.5px; margin-bottom: 5px;">{title}</div>'
+                f'<div class="med-section-text" style="color: #334155; font-size: 16px; line-height: 1.7;">{body}</div>'
                 '</div>'
             )
         else:
-            html += f'<div class="med-section-intro" style="color: #334155; font-size: 14px; line-height: 1.6; margin: 6px 0;">{body}</div>'
+            html += f'<div class="med-section-intro" style="color: #334155; font-size: 16px; line-height: 1.7; margin: 6px 0;">{body}</div>'
 
     return html
 
@@ -1069,7 +1069,7 @@ def auth_ui():
         }
         .brand-heading {
             font-family: 'Outfit', sans-serif !important;
-            font-size: 34px !important;
+            font-size: 36px !important;
             font-weight: 800 !important;
             letter-spacing: -0.5px !important;
             margin: 0 0 4px 0 !important;
@@ -1081,14 +1081,14 @@ def auth_ui():
             -webkit-text-fill-color: transparent;
         }
         .brand-portal-tag {
-            font-size: 14px !important;
+            font-size: 15.5px !important;
             font-weight: 600 !important;
             color: #6366f1 !important;
             margin-bottom: 6px !important;
             letter-spacing: 0.2px !important;
         }
         .brand-caption {
-            font-size: 13.5px !important;
+            font-size: 15px !important;
             color: #64748b !important;
             margin: 0 !important;
             line-height: 1.5 !important;
@@ -1097,7 +1097,7 @@ def auth_ui():
 
         /* Form Inputs */
         label[data-testid="stWidgetLabel"] p {
-            font-size: 13.5px !important;
+            font-size: 15px !important;
             font-weight: 600 !important;
             color: #334155 !important;
             margin-bottom: 6px !important;
@@ -1111,6 +1111,15 @@ def auth_ui():
             padding: 4px 14px !important;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
             transition: all 0.2s ease !important;
+        }
+        div[data-baseweb="input"] input {
+            color: #0f172a !important;
+            font-size: 16px !important;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
+        div[data-baseweb="input"] input::placeholder {
+            color: #94a3b8 !important;
+            font-size: 15px !important;
         }
         div[data-baseweb="input"]:focus-within {
             border-color: #6366f1 !important;
@@ -1133,8 +1142,9 @@ def auth_ui():
             color: #ffffff !important;
             border-radius: 12px !important;
             box-shadow: 0 4px 12px rgba(79, 70, 229, 0.28) !important;
-            min-height: 42px !important;
+            min-height: 44px !important;
             border: none !important;
+            font-size: 15.5px !important;
             font-weight: 700 !important;
         }
 
@@ -1144,7 +1154,8 @@ def auth_ui():
             border-radius: 12px !important;
             box-shadow: none !important;
             border: none !important;
-            min-height: 42px !important;
+            min-height: 44px !important;
+            font-size: 15.5px !important;
             font-weight: 600 !important;
         }
         div[data-testid="stHorizontalBlock"] button[kind="secondary"]:hover {
@@ -1155,10 +1166,10 @@ def auth_ui():
         /* Action Buttons */
         div.stButton > button {
             width: 100% !important;
-            min-height: 48px !important;
+            min-height: 50px !important;
             border-radius: 14px !important;
             font-weight: 700 !important;
-            font-size: 15px !important;
+            font-size: 16px !important;
             transition: all 0.2s ease !important;
             cursor: pointer !important;
         }
@@ -1191,7 +1202,7 @@ def auth_ui():
         .auth-divider span {
             padding: 0 14px;
             color: #94a3b8;
-            font-size: 13px;
+            font-size: 14.5px;
             font-weight: 500;
         }
         .trust-grid {
@@ -1213,10 +1224,10 @@ def auth_ui():
             stroke: #4f46e5;
         }
         .trust-text {
-            font-size: 11.5px;
+            font-size: 13px;
             color: #64748b;
             font-weight: 500;
-            line-height: 1.3;
+            line-height: 1.35;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -1225,7 +1236,7 @@ def auth_ui():
         # Language Selector Bar at top of Auth Card
         col_l1, col_l2 = st.columns([1.2, 1.8])
         with col_l1:
-            st.markdown(f'<div style="font-size:12.5px; font-weight:700; color:#4f46e5; padding-top:6px;">🌐 {t("lang_label")}</div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="font-size:14.5px; font-weight:700; color:#4f46e5; padding-top:6px;">🌐 {t("lang_label")}</div>', unsafe_allow_html=True)
         with col_l2:
             lang_opts = ["English", "Hindi", "Marathi"]
             curr_l = st.session_state.get("selected_lang", "English")
@@ -1392,16 +1403,16 @@ def chatbot_ui(username):
         vs_status = get_vectorstore_status()
         if vs_status["loaded"]:
             st.markdown(
-                f'<div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:6px 10px; margin:4px 0 10px 0; font-size:11.5px; color:#1e40af; display:flex; align-items:center; gap:6px;">'
+                f'<div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:8px 12px; margin:4px 0 10px 0; font-size:13.5px; color:#1e40af; display:flex; align-items:center; gap:6px;">'
                 f'<span>📚</span> <span><b>{t("textbooks_ready", count=vs_status["count"])}</b></span>'
                 f'</div>',
                 unsafe_allow_html=True
             )
         else:
             st.markdown(
-                f'<div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:8px 12px; margin:4px 0 6px 0; font-size:12px; color:#1e40af;">'
+                f'<div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:10px 14px; margin:4px 0 6px 0; font-size:14px; color:#1e40af;">'
                 f'<div style="display:flex; align-items:center; gap:6px; font-weight:600;"><span>⏳</span> <span>{t("connecting_library")}</span></div>'
-                f'<div style="font-size:11px; margin-top:3px; color:#3b82f6;">{t("loading_vectors")}</div>'
+                f'<div style="font-size:13px; margin-top:3px; color:#3b82f6;">{t("loading_vectors")}</div>'
                 f'</div>',
                 unsafe_allow_html=True
             )
@@ -1566,13 +1577,13 @@ def chatbot_ui(username):
             source_badge = ""
             msg_source = msg.get("source")
             if msg_source in ["rag", "rag_groq"]:
-                source_badge = f'<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#eff6ff; color:#1d4ed8; padding:3px 10px; border-radius:12px; border:1px solid #bfdbfe; font-weight:600; margin-left:10px;">{t("badge_rag_groq")}</span>'
+                source_badge = f'<span style="display:inline-flex; align-items:center; gap:5px; font-size:13px; background:#eff6ff; color:#1d4ed8; padding:4px 11px; border-radius:12px; border:1px solid #bfdbfe; font-weight:600; margin-left:10px;">{t("badge_rag_groq")}</span>'
             elif msg_source == "textbook_direct":
-                source_badge = f'<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#f5f3ff; color:#6d28d9; padding:3px 10px; border-radius:12px; border:1px solid #ddd6fe; font-weight:600; margin-left:10px;">{t("badge_textbook_direct")}</span>'
+                source_badge = f'<span style="display:inline-flex; align-items:center; gap:5px; font-size:13px; background:#f5f3ff; color:#6d28d9; padding:4px 11px; border-radius:12px; border:1px solid #ddd6fe; font-weight:600; margin-left:10px;">{t("badge_textbook_direct")}</span>'
             elif msg_source == "groq":
-                source_badge = f'<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#f0fdf4; color:#15803d; padding:3px 10px; border-radius:12px; border:1px solid #bbf7d0; font-weight:600; margin-left:10px;">{t("badge_groq")}</span>'
+                source_badge = f'<span style="display:inline-flex; align-items:center; gap:5px; font-size:13px; background:#f0fdf4; color:#15803d; padding:4px 11px; border-radius:12px; border:1px solid #bbf7d0; font-weight:600; margin-left:10px;">{t("badge_groq")}</span>'
             elif msg_source == "offline":
-                source_badge = f'<span style="display:inline-flex; align-items:center; gap:5px; font-size:11px; background:#fefce8; color:#a16207; padding:3px 10px; border-radius:12px; border:1px solid #fef08a; font-weight:600; margin-left:10px;">{t("badge_offline")}</span>'
+                source_badge = f'<span style="display:inline-flex; align-items:center; gap:5px; font-size:13px; background:#fefce8; color:#a16207; padding:4px 11px; border-radius:12px; border:1px solid #fef08a; font-weight:600; margin-left:10px;">{t("badge_offline")}</span>'
 
             bot_card_html = (
                 '<div class="chat-row bot-row">'
