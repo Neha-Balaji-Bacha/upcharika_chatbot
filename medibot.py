@@ -1018,21 +1018,57 @@ def auth_ui():
             display: none !important;
         }
 
-        /* Fluid background matching Mockup 1 */
+        /* Complete elimination of top padding & Streamlit header push */
+        header[data-testid="stHeader"],
+        [data-testid="stHeader"] {
+            display: none !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            visibility: hidden !important;
+        }
+        div[data-testid="stToolbar"],
+        div[data-testid="stDecoration"] {
+            display: none !important;
+            height: 0 !important;
+        }
         [data-testid="stAppViewContainer"] {
             background: radial-gradient(100% 100% at 50% 0%, #eff6ff 0%, #f8fafc 50%, #ede9fe 100%) !important;
+            padding-top: 0 !important;
+            margin-top: 0 !important;
+        }
+        [data-testid="stAppViewContainer"] > .main,
+        section[data-testid="stMain"],
+        section.main {
+            padding-top: 0 !important;
+            margin-top: 0 !important;
         }
 
-        /* Single, non-cascading executive Auth Card */
+        /* Single, non-cascading executive Auth Card tightly hugging top */
+        [data-testid="stAppViewContainer"] section.main .block-container,
+        .main .block-container,
+        div[data-testid="stAppViewBlockContainer"],
         .block-container {
-            max-width: 450px !important;
-            width: 90% !important;
-            margin: 10px auto 30px auto !important;
+            max-width: 440px !important;
+            width: 92% !important;
+            margin-top: 6px !important;
+            margin-bottom: 16px !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
             background: #ffffff !important;
             border: 1.5px solid #e2e8f0 !important;
-            border-radius: 26px !important;
-            box-shadow: 0 20px 50px -15px rgba(99, 102, 241, 0.16), 0 0 1px 1px rgba(226, 232, 240, 0.8) !important;
-            padding: 18px 28px 22px 28px !important;
+            border-radius: 22px !important;
+            box-shadow: 0 16px 40px -10px rgba(99, 102, 241, 0.14), 0 0 1px 1px rgba(226, 232, 240, 0.8) !important;
+            padding-top: 10px !important;
+            padding-bottom: 18px !important;
+            padding-left: 22px !important;
+            padding-right: 22px !important;
+        }
+
+        /* Compact Streamlit vertical flow */
+        div[data-testid="stVerticalBlock"] {
+            gap: 0.45rem !important;
         }
 
         div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"],
@@ -1052,27 +1088,28 @@ def auth_ui():
             align-items: center;
             justify-content: center;
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 6px !important;
         }
         .brand-glow-circle {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 64px;
-            height: 64px;
+            width: 52px;
+            height: 52px;
             background: linear-gradient(135deg, #e0e7ff 0%, #ede9fe 100%);
             border: 1.5px solid rgba(99, 102, 241, 0.25);
-            border-radius: 20px;
-            font-size: 32px;
-            margin: 0 auto 10px auto;
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.16);
+            border-radius: 16px;
+            font-size: 26px;
+            margin: 0 auto 6px auto;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.15);
         }
         .brand-heading {
             font-family: 'Outfit', sans-serif !important;
-            font-size: 36px !important;
+            font-size: 30px !important;
             font-weight: 800 !important;
             letter-spacing: -0.5px !important;
-            margin: 0 0 4px 0 !important;
+            margin: 0 0 2px 0 !important;
+            line-height: 1.15 !important;
             color: #1e1b4b !important;
         }
         .brand-heading-gradient {
@@ -1081,17 +1118,17 @@ def auth_ui():
             -webkit-text-fill-color: transparent;
         }
         .brand-portal-tag {
-            font-size: 15.5px !important;
+            font-size: 13.5px !important;
             font-weight: 600 !important;
             color: #6366f1 !important;
-            margin-bottom: 6px !important;
+            margin-bottom: 2px !important;
             letter-spacing: 0.2px !important;
         }
         .brand-caption {
-            font-size: 15px !important;
+            font-size: 13px !important;
             color: #64748b !important;
             margin: 0 !important;
-            line-height: 1.5 !important;
+            line-height: 1.35 !important;
             font-weight: 400 !important;
         }
 
@@ -1345,6 +1382,9 @@ def auth_ui():
 def chatbot_ui(username):
     st.markdown("""
     <style>
+        [data-testid="stAppViewContainer"] section.main .block-container,
+        .main .block-container,
+        div[data-testid="stAppViewBlockContainer"],
         .block-container {
             max-width: 100% !important;
             width: 100% !important;
@@ -1353,7 +1393,7 @@ def chatbot_ui(username):
             border: none !important;
             border-radius: 0 !important;
             box-shadow: none !important;
-            padding-top: 0.8rem !important;
+            padding-top: 10px !important;
             padding-bottom: 2rem !important;
             padding-left: 2rem !important;
             padding-right: 2rem !important;
