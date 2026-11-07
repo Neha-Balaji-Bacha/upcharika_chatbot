@@ -18,6 +18,12 @@ html, body, [class*="css"] {
 
 [data-testid="stHeader"] {
     background: transparent !important;
+    height: 2.2rem !important;
+    min-height: 2.2rem !important;
+}
+
+.main .block-container {
+    padding-top: 1rem !important;
 }
 
 #MainMenu, footer {
@@ -54,20 +60,20 @@ div[data-testid="stHorizontalBlock"] div[data-testid="column"] {
     align-items: center;
     justify-content: center;
     text-align: center;
-    margin-bottom: 22px;
+    margin-bottom: 12px;
 }
 
 .brand-glow-circle {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 76px !important;
-    height: 76px !important;
+    width: 64px !important;
+    height: 64px !important;
     background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(168, 85, 247, 0.08)) !important;
     border: 1.5px solid rgba(99, 102, 241, 0.22) !important;
-    border-radius: 22px !important;
-    font-size: 38px !important;
-    margin: 0 auto 14px auto !important;
+    border-radius: 20px !important;
+    font-size: 32px !important;
+    margin: 0 auto 10px auto !important;
     box-shadow: 0 4px 16px rgba(99, 102, 241, 0.12) !important;
     transition: transform 0.3s ease, box-shadow 0.3s ease !important;
 }

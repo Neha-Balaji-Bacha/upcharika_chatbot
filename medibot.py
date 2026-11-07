@@ -1027,12 +1027,12 @@ def auth_ui():
         .block-container {
             max-width: 450px !important;
             width: 90% !important;
-            margin: 40px auto !important;
+            margin: 10px auto 30px auto !important;
             background: #ffffff !important;
             border: 1.5px solid #e2e8f0 !important;
-            border-radius: 28px !important;
-            box-shadow: 0 25px 60px -15px rgba(99, 102, 241, 0.16), 0 0 1px 1px rgba(226, 232, 240, 0.8) !important;
-            padding: 38px 32px 30px 32px !important;
+            border-radius: 26px !important;
+            box-shadow: 0 20px 50px -15px rgba(99, 102, 241, 0.16), 0 0 1px 1px rgba(226, 232, 240, 0.8) !important;
+            padding: 18px 28px 22px 28px !important;
         }
 
         div[data-testid="stHorizontalBlock"] div[data-testid="stColumn"],
@@ -1052,20 +1052,20 @@ def auth_ui():
             align-items: center;
             justify-content: center;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
         .brand-glow-circle {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 76px;
-            height: 76px;
+            width: 64px;
+            height: 64px;
             background: linear-gradient(135deg, #e0e7ff 0%, #ede9fe 100%);
             border: 1.5px solid rgba(99, 102, 241, 0.25);
-            border-radius: 24px;
-            font-size: 38px;
-            margin: 0 auto 14px auto;
-            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.18);
+            border-radius: 20px;
+            font-size: 32px;
+            margin: 0 auto 10px auto;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.16);
         }
         .brand-heading {
             font-family: 'Outfit', sans-serif !important;
@@ -1134,7 +1134,7 @@ def auth_ui():
             border-radius: 16px !important;
             border: 1px solid #e2e8f0 !important;
             gap: 4px !important;
-            margin: 16px 0 20px 0 !important;
+            margin: 12px 0 14px 0 !important;
         }
 
         div[data-testid="stHorizontalBlock"] button[kind="primary"] {
@@ -1191,7 +1191,7 @@ def auth_ui():
             display: flex;
             align-items: center;
             text-align: center;
-            margin: 22px 0 18px 0;
+            margin: 16px 0 12px 0;
         }
         .auth-divider::before,
         .auth-divider::after {
@@ -1353,7 +1353,7 @@ def chatbot_ui(username):
             border: none !important;
             border-radius: 0 !important;
             box-shadow: none !important;
-            padding-top: 1.5rem !important;
+            padding-top: 0.8rem !important;
             padding-bottom: 2rem !important;
             padding-left: 2rem !important;
             padding-right: 2rem !important;
