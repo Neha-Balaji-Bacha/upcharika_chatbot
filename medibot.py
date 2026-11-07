@@ -778,32 +778,132 @@ def translate_text(text, lang, force_offline=False, source_lang=None):
     return "\n\n".join(translated_sections)
 
 # ================= VOICE =================
-def extract_voice_summary(text):
-    if not text:
+def extract_voice_summary(raw_text, lang="English"):
+    if not raw_text:
         return ""
-    clean = clean_text_for_voice(text)
     import re
-    # Split by English period, Devanagari danda, or newlines
-    sentences = [s.strip() for s in re.split(r'[\.।\n\r]+', clean) if len(s.strip()) > 5]
-    if sentences:
-        is_devanagari = any('\u0900' <= c <= '\u097f' for c in clean)
-        punct = "। " if is_devanagari else ". "
-        summary = punct.join(sentences[:2])
-        if not summary.endswith((".", "।", "!")):
-            summary += punct.strip()
-        # Truncate to natural word boundary without adding '...' (which causes gTTS to say 'full stop')
-        if len(summary) > 250:
-            summary = summary[:245].rsplit(' ', 1)[0]
-            if not summary.endswith((".", "।")):
-                summary += ("।" if is_devanagari else ".")
-        return summary
-    return clean[:250]
+
+    header_keywords = {
+        'cause': ['cause', 'causes', 'कारण', 'कारणे'],
+        'solution': ['solution', 'solutions', 'care', 'उपाय', 'घरगुती उपाय', 'काळजी', 'समाधान'],
+        'medicine': ['medicine', 'medication', 'medications', 'औषध', 'औषधे', 'औषधोपचार', 'दवा', 'दवाई', 'दवाइयां'],
+        'doctor': ['when to see doctor', 'doctor', 'डॉक्टर', 'डॉक्टरांचा सल्ला', 'डॉक्टर से परामर्श'],
+        'emergency': ['emergency', 'तातडी', 'आणीबाणी', 'आपात', 'आपातकालीन']
+    }
+
+    spoken_headers = {
+        'English': {
+            'cause': 'Cause: ',
+            'solution': 'Solution: ',
+            'medicine': 'Medicine: ',
+            'doctor': 'When to see doctor: ',
+            'emergency': 'Emergency: '
+        },
+        'Marathi': {
+            'cause': 'कारण: ',
+            'solution': 'उपाय: ',
+            'medicine': 'औषधे: ',
+            'doctor': 'डॉक्टरांचा सल्ला: ',
+            'emergency': 'आणीबाणी: '
+        },
+        'Hindi': {
+            'cause': 'कारण: ',
+            'solution': 'उपाय: ',
+            'medicine': 'दवाइयां: ',
+            'doctor': 'डॉक्टर से परामर्श: ',
+            'emergency': 'आपातकालीन: '
+        }
+    }
+
+    hdrs = spoken_headers.get(lang, spoken_headers['English'])
+
+    def get_first_sentences(text_content, n=1):
+        if not text_content:
+            return ''
+        parts = [p.strip() for p in re.split(r'[\.।!?\n\r]+', text_content) if len(p.strip()) > 3]
+        if not parts:
+            return ''
+        is_dev = any('\u0900' <= c <= '\u097f' for c in text_content)
+        end_p = '। ' if is_dev else '. '
+        chosen = parts[:n]
+        res = end_p.join(chosen).strip()
+        if not res.endswith(('.', '।', '!')):
+            res += ('।' if is_dev else '.')
+        return res
+
+    sections = {}
+    current_key = None
+    current_lines = []
+
+    for line in raw_text.splitlines():
+        line_clean = line.strip().replace('*', '').replace('#', '')
+        if not line_clean:
+            continue
+        no_bullet = re.sub(r'^[\d\.\-\*•\s]+', '', line_clean).strip()
+
+        matched_cat = None
+        if ':' in no_bullet:
+            prefix = no_bullet.split(':', 1)[0].strip().lower()
+            for cat, kws in header_keywords.items():
+                if any(kw in prefix for kw in kws):
+                    matched_cat = cat
+                    remainder = no_bullet.split(':', 1)[1].strip()
+                    break
+        else:
+            prefix = no_bullet.lower()
+            for cat, kws in header_keywords.items():
+                if any(kw == prefix for kw in kws):
+                    matched_cat = cat
+                    remainder = ''
+                    break
+
+        if matched_cat:
+            if current_key and current_lines:
+                sections[current_key] = ' '.join(current_lines)
+            current_key = matched_cat
+            current_lines = [remainder] if remainder else []
+        else:
+            if current_key:
+                current_lines.append(line_clean)
+            else:
+                current_lines.append(line_clean)
+
+    if current_key and current_lines:
+        sections[current_key] = ' '.join(current_lines)
+
+    summary_parts = []
+    # If structured medical sections are present, build a 360-degree consultation summary
+    if any(k in sections for k in ['cause', 'solution', 'medicine', 'doctor']):
+        for cat in ['cause', 'solution', 'medicine', 'doctor', 'emergency']:
+            if cat in sections and sections[cat].strip():
+                body = clean_text_for_voice(sections[cat])
+                # Solution gets up to 2 sentences; others get 1 key sentence
+                n_sent = 2 if cat == 'solution' else 1
+                sent = get_first_sentences(body, n=n_sent)
+                if sent:
+                    summary_parts.append(hdrs[cat] + sent)
+        summary = ' '.join(summary_parts)
+    else:
+        # Fallback for conversational / unstructured text: take up to 4 complete sentences
+        body = clean_text_for_voice(raw_text)
+        summary = get_first_sentences(body, n=4)
+
+    # Sanity check for length (keep up to ~950 characters so gTTS speaks a complete, rich consultation)
+    if len(summary) > 950:
+        summary = summary[:940].rsplit(' ', 1)[0]
+        is_dev = any('\u0900' <= c <= '\u097f' for c in summary)
+        if not summary.endswith(('.', '।', '!')):
+            summary += ('।' if is_dev else '.')
+
+    return summary
 
 def generate_voice(text, lang):
     try:
         if not text:
             return None
-        speech_text = extract_voice_summary(text)
+        speech_text = extract_voice_summary(text, lang=lang)
+        if not speech_text:
+            speech_text = clean_text_for_voice(text)[:400]
         lang_map = {"English": "en", "Hindi": "hi", "Marathi": "mr"}
         target_lang = lang_map.get(lang, "en")
         tts = gTTS(text=speech_text, lang=target_lang)
@@ -811,7 +911,8 @@ def generate_voice(text, lang):
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as fp:
             tts.save(fp.name)
             return fp.name
-    except Exception:
+    except Exception as e:
+        print(f"[Voice Error] {e}")
         return None
 
 # ================= UI LOCALIZATION (i18n) =================
@@ -1484,8 +1585,7 @@ def chatbot_ui(username):
                         msg["text"] = re_trans
                         msg["lang"] = lang
                         try:
-                            clean_t = clean_text_for_voice(re_trans)
-                            msg["audio"] = generate_voice(clean_t, lang)
+                            msg["audio"] = generate_voice(re_trans, lang)
                         except Exception:
                             pass
             st.rerun()
@@ -1580,8 +1680,7 @@ def chatbot_ui(username):
 
                         audio = None
                         try:
-                            clean_text = clean_text_for_voice(trans)
-                            audio = generate_voice(clean_text, lang)
+                            audio = generate_voice(trans, lang)
                         except Exception:
                             audio = None
 
@@ -1667,8 +1766,7 @@ def chatbot_ui(username):
 
             audio = None
             try:
-                clean_text = clean_text_for_voice(translated)
-                audio = generate_voice(clean_text, lang)
+                audio = generate_voice(translated, lang)
             except Exception:
                 audio = None
 
