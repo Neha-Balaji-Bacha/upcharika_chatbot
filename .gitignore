@@ -5,12 +5,6 @@ vectorstore/db_faiss/index.faiss
 vectorstore/db_faiss.zip
 data/
 *.pdf
-!UpCharika_Complete_Project_Study_Guide.pdf
-!UpCharika_Complete_Project_Flow.pdf
-!UpCharika_Project_Folder_Structure_Guide.pdf
-!UpCharika_Master_VectorStore_and_RAG_Architecture_Guide.pdf
-!UpCharika_Groq_API_and_Medical_Textbook_Master_Guide.pdf
-!UpCharika_Medibot_Code_Walkthrough_and_Viva_Guide.pdf
 *.zip
 *.gguf
 .env
